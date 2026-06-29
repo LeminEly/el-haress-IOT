@@ -7,7 +7,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .auth_models import AccountRole, AccountStatus
+from .auth_models import AccountLanguage, AccountRole, AccountStatus
 from .auth_schemas import StrictModel
 
 
@@ -16,12 +16,14 @@ class AccountCreate(StrictModel):
     password: str = Field(min_length=10, max_length=128)
     company_name: str = Field(min_length=1, max_length=255)
     contact_email: str | None = Field(default=None, max_length=255)
+    language: AccountLanguage = AccountLanguage.FR
     role: AccountRole = AccountRole.COMPANY
 
 
 class AccountUpdate(StrictModel):
     company_name: str | None = Field(default=None, min_length=1, max_length=255)
     contact_email: str | None = Field(default=None, max_length=255)
+    language: AccountLanguage | None = None
     status: AccountStatus | None = None
 
 
@@ -32,6 +34,7 @@ class AccountRead(BaseModel):
     phone_number: str
     company_name: str
     contact_email: str | None = None
+    language: AccountLanguage
     role: AccountRole
     status: AccountStatus
     created_at: datetime

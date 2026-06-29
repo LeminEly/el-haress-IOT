@@ -4,7 +4,13 @@
     "tagline": "Supervision environnementale des salles serveurs"
   },
   "theme": { "toggle": "Changer de theme" },
-  "language": { "label": "Langue" },
+  "language": {
+    "label": "Langue",
+    "alerts": "Langue des alertes",
+    "fr": "Francais",
+    "ar": "العربية",
+    "en": "English"
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "history": "Historique",

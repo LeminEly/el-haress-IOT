@@ -4,7 +4,13 @@
     "tagline": "مراقبة بيئة غرف الخوادم"
   },
   "theme": { "toggle": "تغيير السمة" },
-  "language": { "label": "اللغة" },
+  "language": {
+    "label": "اللغة",
+    "alerts": "لغة التنبيهات",
+    "fr": "Francais",
+    "ar": "العربية",
+    "en": "English"
+  },
   "nav": {
     "dashboard": "لوحة التحكم",
     "history": "السجل",

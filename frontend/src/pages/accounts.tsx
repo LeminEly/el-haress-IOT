@@ -7,11 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectItem } from '@/components/ui/select';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import { useAccounts, useCreateAccount, useUpdateAccount } from '@/hooks/queries';
 import { formatDateTime } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
-import type { AccountSummary } from '@/types/api';
+import type { AccountLanguage, AccountSummary } from '@/types/api';
+
+const LANGUAGES: AccountLanguage[] = ['fr', 'ar', 'en'];
 
 export default function AccountsPage() {
   const { t } = useTranslation();
@@ -24,12 +27,14 @@ export default function AccountsPage() {
   const [password, setPassword] = useState('');
   const [company, setCompany] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [language, setLanguage] = useState<AccountLanguage>('fr');
 
   const [search, setSearch] = useState('');
 
   const [editing, setEditing] = useState<AccountSummary | null>(null);
   const [editCompany, setEditCompany] = useState('');
   const [editEmail, setEditEmail] = useState('');
+  const [editLanguage, setEditLanguage] = useState<AccountLanguage>('fr');
 
   const [confirmTarget, setConfirmTarget] = useState<{
     id: string;
@@ -53,6 +58,7 @@ export default function AccountsPage() {
         password,
         company_name: company,
         contact_email: contactEmail || undefined,
+        language,
       },
       {
         onSuccess: () => {
@@ -60,6 +66,7 @@ export default function AccountsPage() {
           setPassword('');
           setCompany('');
           setContactEmail('');
+          setLanguage('fr');
         },
       },
     );
@@ -69,12 +76,18 @@ export default function AccountsPage() {
     setEditing(account);
     setEditCompany(account.company_name);
     setEditEmail(account.contact_email ?? '');
+    setEditLanguage(account.language);
   };
 
   const saveEdit = () => {
     if (!editing) return;
     update.mutate(
-      { id: editing.id, company_name: editCompany, contact_email: editEmail || null },
+      {
+        id: editing.id,
+        company_name: editCompany,
+        contact_email: editEmail || null,
+        language: editLanguage,
+      },
       { onSuccess: () => setEditing(null) },
     );
   };
@@ -139,6 +152,20 @@ export default function AccountsPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('language.alerts')}</Label>
+              <Select
+                aria-label={t('language.alerts')}
+                value={language}
+                onValueChange={(value) => setLanguage(value as AccountLanguage)}
+              >
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {t(`language.${lang}`)}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
             <div className="sm:col-span-2 lg:col-span-4">
               <Button type="submit" disabled={create.isPending}>
@@ -277,6 +304,20 @@ export default function AccountsPage() {
                 value={editEmail}
                 onChange={(e) => setEditEmail(e.target.value)}
               />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('language.alerts')}</Label>
+              <Select
+                aria-label={t('language.alerts')}
+                value={editLanguage}
+                onValueChange={(value) => setEditLanguage(value as AccountLanguage)}
+              >
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {t(`language.${lang}`)}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
             <div className="flex items-center gap-1.5">
               <Label className="text-fg-muted text-sm">{t('accountsEdit.phoneNumber')}</Label>

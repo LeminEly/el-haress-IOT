@@ -25,6 +25,9 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from ..auth.auth_models import Account
+from ..notifications.messages import build_alert_message
+from ..sensors.sensors_models import Sensor
+from ..sensors.ste2_parser import is_binary_kind
 from .alerting_models import Alert, AlertCondition, AlertRule, AlertStatus
 
 logger = structlog.get_logger(__name__)
@@ -35,6 +38,21 @@ _OPERATORS = {
     AlertCondition.LT: lambda value, threshold: value < threshold,
     AlertCondition.LTE: lambda value, threshold: value <= threshold,
 }
+
+
+def _sensor_name(sensor: Sensor | None) -> str:
+    if sensor is None:
+        return "?"
+    if sensor.device_index is not None:
+        return f"el-haress-{sensor.device_index:02d}-{sensor.label}"
+    return sensor.label
+
+
+def _value_text(sensor: Sensor | None, value: float) -> str:
+    if sensor is not None and is_binary_kind(sensor.kind):
+        return "1" if value > 0.5 else "0"
+    unit = f" {sensor.unit}" if sensor is not None and sensor.unit else ""
+    return f"{value}{unit}"
 
 
 @dataclass(frozen=True)
@@ -133,15 +151,22 @@ class AlertEngine:
         )
 
         if self._notifier is not None and account is not None:
+            sensor = await session.get(Sensor, event.sensor_id)
+            subject, body = build_alert_message(
+                account.language.value,
+                rule=rule.name,
+                sensor=_sensor_name(sensor),
+                value=_value_text(sensor, event.value),
+                condition=rule.condition.value,
+                threshold=rule.threshold,
+                moment=event.recorded_at,
+            )
             await self._notifier.dispatch(
                 channels=list(rule.channels),
                 phone=account.phone_number,
                 email=account.contact_email,
-                subject=f"[{rule.severity}] {rule.name}",
-                body=(
-                    f"Valeur {event.value} ({rule.condition} {rule.threshold}) "
-                    f"a {event.recorded_at.isoformat()}"
-                ),
+                subject=subject,
+                body=body,
             )
         return alert
 

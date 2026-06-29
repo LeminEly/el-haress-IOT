@@ -15,7 +15,7 @@ from ..config import Settings
 from ..core.exceptions import ProblemException
 from ..db.audit_models import AuditLog
 from .accounts_schemas import AccountCreate
-from .auth_models import Account, AccountStatus
+from .auth_models import Account, AccountLanguage, AccountStatus
 from .phone import normalize_phone
 from .security import hash_password
 
@@ -43,6 +43,7 @@ class AccountsService:
             password_hash=hash_password(data.password, rounds=self._settings.bcrypt_rounds),
             company_name=data.company_name,
             contact_email=data.contact_email,
+            language=data.language,
             role=data.role,
             status=AccountStatus.ACTIVE,
         )
@@ -94,6 +95,7 @@ class AccountsService:
         actor_id: uuid.UUID,
         company_name: str | None = None,
         contact_email: str | None = None,
+        language: AccountLanguage | None = None,
     ) -> Account:
         account = await self._session.get(Account, account_id)
         if account is None:
@@ -106,6 +108,9 @@ class AccountsService:
         if contact_email is not None and contact_email != account.contact_email:
             changed["contact_email"] = f"{account.contact_email or ''} -> {contact_email}"
             account.contact_email = contact_email
+        if language is not None and language != account.language:
+            changed["language"] = f"{account.language.value} -> {language.value}"
+            account.language = language
 
         if changed:
             self._session.add(

@@ -7,7 +7,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .auth_models import AccountRole, AccountStatus
+from .auth_models import AccountLanguage, AccountRole, AccountStatus
 
 
 class StrictModel(BaseModel):
@@ -34,6 +34,7 @@ class AccountProfile(BaseModel):
     phone_number: str
     company_name: str
     contact_email: str | None = None
+    language: AccountLanguage
     role: AccountRole
     status: AccountStatus
     last_login_at: datetime | None = None

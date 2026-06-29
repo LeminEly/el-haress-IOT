@@ -139,6 +139,7 @@ export function useCreateAccount() {
       password: string;
       company_name: string;
       contact_email?: string;
+      language?: 'fr' | 'ar' | 'en';
     }) => apiClient.post('/accounts', body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
   });
@@ -154,6 +155,7 @@ export function useUpdateAccount() {
       id: string;
       company_name?: string;
       contact_email?: string | null;
+      language?: 'fr' | 'ar' | 'en';
       status?: 'ACTIVE' | 'SUSPENDED';
     }) => apiClient.patch(`/accounts/${id}`, body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),

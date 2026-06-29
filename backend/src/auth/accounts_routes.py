@@ -56,6 +56,7 @@ async def update_account(
         actor_id=principal.account_id,
         company_name=payload.company_name,
         contact_email=payload.contact_email,
+        language=payload.language,
     )
     if payload.status is not None:
         account = await svc.set_status(account_id, payload.status, actor_id=principal.account_id)

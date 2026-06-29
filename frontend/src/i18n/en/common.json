@@ -4,7 +4,13 @@
     "tagline": "Server room environmental monitoring"
   },
   "theme": { "toggle": "Toggle theme" },
-  "language": { "label": "Language" },
+  "language": {
+    "label": "Language",
+    "alerts": "Alert language",
+    "fr": "Francais",
+    "ar": "العربية",
+    "en": "English"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "history": "History",

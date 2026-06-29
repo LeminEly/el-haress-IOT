@@ -25,6 +25,12 @@ class AccountStatus(enum.StrEnum):
     SUSPENDED = "SUSPENDED"
 
 
+class AccountLanguage(enum.StrEnum):
+    FR = "fr"
+    AR = "ar"
+    EN = "en"
+
+
 class Account(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "accounts"
 
@@ -40,6 +46,20 @@ class Account(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     status: Mapped[AccountStatus] = mapped_column(
         Enum(AccountStatus, native_enum=False, length=20),
         default=AccountStatus.ACTIVE,
+        nullable=False,
+    )
+    # Langue des notifications (WhatsApp/SMS/Email) envoyees a ce compte.
+    # values_callable : on persiste la valeur ("fr"/"ar"/"en"), pas le nom de membre,
+    # pour rester coherent avec les codes de langue (i18n) et la migration.
+    language: Mapped[AccountLanguage] = mapped_column(
+        Enum(
+            AccountLanguage,
+            native_enum=False,
+            length=2,
+            values_callable=lambda enum: [member.value for member in enum],
+        ),
+        default=AccountLanguage.FR,
+        server_default=AccountLanguage.FR.value,
         nullable=False,
     )
 

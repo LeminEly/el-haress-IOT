@@ -1,5 +1,6 @@
 export type AccountRole = 'SUPER_ADMIN' | 'COMPANY';
 export type AccountStatus = 'ACTIVE' | 'SUSPENDED';
+export type AccountLanguage = 'fr' | 'ar' | 'en';
 export type AlertSeverity = 'INFO' | 'WARNING' | 'CRITICAL' | 'EMERGENCY';
 export type AlertStatus = 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED';
 export type AlertCondition = 'GT' | 'GTE' | 'LT' | 'LTE';
@@ -23,6 +24,7 @@ export interface AccountProfile {
   phone_number: string;
   company_name: string;
   contact_email: string | null;
+  language: AccountLanguage;
   role: AccountRole;
   status: AccountStatus;
   last_login_at: string | null;
