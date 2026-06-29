@@ -1,0 +1,29 @@
+{
+  "app": {
+    "name": "El-Haress",
+    "tagline": "Supervision environnementale des salles serveurs"
+  },
+  "foundation": {
+    "title": "Socle frontend operationnel",
+    "description": "Theme clair/sombre, multilingue (FR / AR / EN) et tokens du systeme de design sont en place.",
+    "ready": "Pret pour le developpement de l'interface"
+  },
+  "theme": {
+    "toggle": "Changer de theme",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Systeme"
+  },
+  "language": {
+    "label": "Langue",
+    "fr": "Francais",
+    "ar": "Arabe",
+    "en": "Anglais"
+  },
+  "status": {
+    "normal": "Normal",
+    "warning": "A surveiller",
+    "critical": "Critique",
+    "offline": "Hors ligne"
+  }
+}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>El-Haress</title>
+    <!--
+      Theme et langue appliques avant le premier paint pour eviter tout flash.
+      Sombre par defaut (standard monitoring). Persistance via localStorage.
+    -->
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('el-haress-theme') || 'dark';
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var dark = theme === 'dark' || (theme === 'system' && prefersDark);
+          document.documentElement.classList.toggle('dark', dark);
+          var locale = localStorage.getItem('el-haress-locale') || 'fr';
+          document.documentElement.lang = locale;
+          document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

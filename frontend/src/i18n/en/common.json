@@ -1,0 +1,29 @@
+{
+  "app": {
+    "name": "El-Haress",
+    "tagline": "Server room environmental monitoring"
+  },
+  "foundation": {
+    "title": "Frontend foundation ready",
+    "description": "Light/dark theme, multilingual (FR / AR / EN) and design system tokens are in place.",
+    "ready": "Ready for interface development"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "fr": "French",
+    "ar": "Arabic",
+    "en": "English"
+  },
+  "status": {
+    "normal": "Normal",
+    "warning": "Warning",
+    "critical": "Critical",
+    "offline": "Offline"
+  }
+}
