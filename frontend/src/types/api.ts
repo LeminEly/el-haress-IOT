@@ -51,6 +51,7 @@ export interface Sensor {
   unit: string | null;
   is_active: boolean;
   last_seen_at: string | null;
+  online: boolean;
   critical_threshold: number | null;
   color: string | null;
 }
@@ -72,6 +73,7 @@ export interface LatestReading {
 export interface DashboardSummary {
   sensors_total: number;
   sensors_active: number;
+  offline_after_seconds: number;
   latest: LatestReading[];
 }
 

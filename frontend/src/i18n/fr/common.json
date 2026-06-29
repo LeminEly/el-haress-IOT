@@ -27,6 +27,7 @@
     "sensorsTotal": "Capteurs",
     "sensorsActive": "Actifs",
     "noSensors": "Aucun capteur declare pour le moment.",
+    "noConnected": "Aucun capteur connecte actuellement. Les capteurs hors ligne restent consultables dans l'historique.",
     "evolution": "Evolution des capteurs",
     "noData": "Aucune donnee sur la periode.",
     "current": "Valeur actuelle",

@@ -15,22 +15,26 @@ import { formatValue } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
 import type { ReadingPoint, Sensor, SensorStatus } from '@/types/api';
 
-const STALE_MS = 120_000;
+// Fenetre de fraicheur par defaut si le resume n'est pas encore charge (secondes).
+const DEFAULT_OFFLINE_AFTER_SECONDS = 10;
 
 interface LiveEntry {
   value: number;
   recorded_at: string;
 }
 
+// Connectivite reelle : capteur actif dont la derniere mesure tient dans la
+// fenetre de fraicheur. Un capteur muet sort tout seul (reevalue par le tick).
+function isOnline(entry: LiveEntry | undefined, sensor: Sensor, windowMs: number): boolean {
+  return (
+    sensor.is_active &&
+    entry !== undefined &&
+    Date.now() - new Date(entry.recorded_at).getTime() <= windowMs
+  );
+}
+
 function sensorStatus(entry: LiveEntry | undefined, sensor: Sensor): SensorStatus {
-  if (
-    !sensor.is_active ||
-    !entry ||
-    Date.now() - new Date(entry.recorded_at).getTime() > STALE_MS
-  ) {
-    return 'offline';
-  }
-  if (sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
+  if (entry && sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
     return 'critical';
   }
   return 'normal';
@@ -72,6 +76,14 @@ export default function DashboardPage() {
     setPoints((previous) => [reading as ReadingPoint, ...previous].slice(0, 3000));
   });
 
+  // Reevalue la connectivite a intervalle regulier : un capteur qui cesse
+  // d'emettre (donc sans evenement live) doit disparaitre de lui-meme.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
   const sensorList = useMemo(() => sensors.data ?? [], [sensors.data]);
   const thresholds = useMemo(() => {
     const map: Record<string, number | null> = {};
@@ -88,7 +100,14 @@ export default function DashboardPage() {
     return <ErrorState onRetry={() => sensors.refetch()} />;
   }
 
-  const visibleSensors = sensorList.filter((sensor) => !hidden.has(sensor.id));
+  // Capteurs reellement connectes : seuls eux sont affiches sur le tableau de
+  // bord. Les capteurs hors-ligne restent consultables dans l'historique.
+  const offlineAfterMs =
+    (summary.data?.offline_after_seconds ?? DEFAULT_OFFLINE_AFTER_SECONDS) * 1000;
+  const onlineSensors = sensorList.filter((sensor) =>
+    isOnline(live[sensor.id], sensor, offlineAfterMs),
+  );
+  const visibleSensors = onlineSensors.filter((sensor) => !hidden.has(sensor.id));
   const detailSensor = sensorList.find((sensor) => sensor.id === detailId);
   const detailPoints = detailSensor
     ? points.filter((point) => point.sensor_id === detailSensor.id)
@@ -118,24 +137,22 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-4 sm:max-w-md">
         <Card className="p-4">
           <span className="text-sm text-fg-muted">{t('dashboard.sensorsTotal')}</span>
-          <p className="mt-1 text-3xl font-semibold tabular-nums">
-            {summary.data?.sensors_total ?? 0}
-          </p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums">{sensorList.length}</p>
         </Card>
         <Card className="p-4">
           <span className="text-sm text-fg-muted">{t('dashboard.sensorsActive')}</span>
-          <p className="mt-1 text-3xl font-semibold tabular-nums">
-            {summary.data?.sensors_active ?? 0}
-          </p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums">{onlineSensors.length}</p>
         </Card>
       </div>
 
       {sensorList.length === 0 ? (
         <EmptyState message={t('dashboard.noSensors')} />
+      ) : onlineSensors.length === 0 ? (
+        <EmptyState message={t('dashboard.noConnected')} />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sensorList.map((sensor) => {
+            {onlineSensors.map((sensor) => {
               const entry = live[sensor.id];
               return (
                 <SensorCard
@@ -156,9 +173,9 @@ export default function DashboardPage() {
               <CardTitle>{t('dashboard.evolution')}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              {/* Legende : tous les capteurs, chacun a son seuil ; cocher pour afficher. */}
+              {/* Legende : capteurs connectes, chacun a son seuil ; cocher pour afficher. */}
               <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {sensorList.map((sensor) => {
+                {onlineSensors.map((sensor) => {
                   const entry = live[sensor.id];
                   return (
                     <label

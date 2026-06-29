@@ -7,11 +7,12 @@ ne renvoie jamais de donnees (et donne 404 en ecriture).
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..config import get_settings
 from ..core.exceptions import ProblemException
 from ..tenancy.tenancy import TenantContext
 from .sensors_models import Gateway, Reading, Sensor
@@ -22,6 +23,7 @@ from .sensors_schemas import (
     LatestReading,
     ReadingBucket,
     ReadingPoint,
+    SensorRead,
     SensorUpdate,
 )
 
@@ -60,12 +62,35 @@ class SensorsService:
 
     # -- Capteurs -----------------------------------------------------------
 
+    def _offline_cutoff(self, now: datetime | None = None) -> datetime:
+        """Horodatage en-deca duquel une mesure est consideree perimee."""
+        window = timedelta(seconds=get_settings().sensor_offline_after_seconds)
+        return (now or datetime.now(UTC)) - window
+
+    @staticmethod
+    def _is_online(sensor: Sensor, cutoff: datetime) -> bool:
+        """Connectivite reelle : capteur actif et mesure plus recente que la
+        fenetre de fraicheur. Distinct du drapeau de configuration `is_active`."""
+        return bool(
+            sensor.is_active and sensor.last_seen_at is not None and sensor.last_seen_at >= cutoff
+        )
+
+    def to_read(self, sensor: Sensor, cutoff: datetime | None = None) -> SensorRead:
+        cutoff = cutoff or self._offline_cutoff()
+        return SensorRead.model_validate(sensor).model_copy(
+            update={"online": self._is_online(sensor, cutoff)}
+        )
+
     async def list_sensors(self) -> list[Sensor]:
         return list(
             await self._session.scalars(
                 select(Sensor).where(Sensor.account_id == self._account_id).order_by(Sensor.label)
             )
         )
+
+    async def list_sensors_read(self) -> list[SensorRead]:
+        cutoff = self._offline_cutoff()
+        return [self.to_read(sensor, cutoff) for sensor in await self.list_sensors()]
 
     async def _get_owned_sensor(self, sensor_id: uuid.UUID) -> Sensor:
         sensor = await self._session.scalar(
@@ -95,11 +120,14 @@ class SensorsService:
         end: datetime | None,
         bucket: ReadingBucket,
         limit: int,
+        offset: int = 0,
     ) -> list[ReadingPoint] | list[AggregatePoint]:
         limit = min(limit, _MAX_LIMIT)
         if bucket is ReadingBucket.RAW:
-            return await self._raw_readings(sensor_id, start, end, limit)
-        return await self._aggregated_readings(_BUCKET_VIEW[bucket], sensor_id, start, end, limit)
+            return await self._raw_readings(sensor_id, start, end, limit, offset)
+        return await self._aggregated_readings(
+            _BUCKET_VIEW[bucket], sensor_id, start, end, limit, offset
+        )
 
     async def _raw_readings(
         self,
@@ -107,6 +135,7 @@ class SensorsService:
         start: datetime | None,
         end: datetime | None,
         limit: int,
+        offset: int = 0,
     ) -> list[ReadingPoint]:
         query = select(Reading).where(Reading.account_id == self._account_id)
         if sensor_id is not None:
@@ -115,7 +144,7 @@ class SensorsService:
             query = query.where(Reading.recorded_at >= start)
         if end is not None:
             query = query.where(Reading.recorded_at < end)
-        query = query.order_by(Reading.recorded_at.desc()).limit(limit)
+        query = query.order_by(Reading.recorded_at.desc()).offset(offset).limit(limit)
         rows = await self._session.scalars(query)
         return [
             ReadingPoint(sensor_id=r.sensor_id, recorded_at=r.recorded_at, value=r.value)
@@ -129,10 +158,15 @@ class SensorsService:
         start: datetime | None,
         end: datetime | None,
         limit: int,
+        offset: int = 0,
     ) -> list[AggregatePoint]:
         # `view` provient d'une enum (jamais d'entree client) ; parametres lies.
         conditions = ["account_id = :account_id"]
-        params: dict[str, object] = {"account_id": self._account_id, "limit": limit}
+        params: dict[str, object] = {
+            "account_id": self._account_id,
+            "limit": limit,
+            "offset": offset,
+        }
         if sensor_id is not None:
             conditions.append("sensor_id = :sensor_id")
             params["sensor_id"] = sensor_id
@@ -145,7 +179,7 @@ class SensorsService:
         sql = text(
             f"SELECT sensor_id, bucket, avg_value, min_value, max_value "
             f"FROM {view} WHERE {' AND '.join(conditions)} "
-            f"ORDER BY bucket DESC LIMIT :limit"
+            f"ORDER BY bucket DESC LIMIT :limit OFFSET :offset"
         )
         result = await self._session.execute(sql, params)
         return [
@@ -180,16 +214,26 @@ class SensorsService:
         ]
 
     async def dashboard_summary(self) -> DashboardSummary:
+        settings = get_settings()
+        cutoff = self._offline_cutoff()
         total = await self._session.scalar(
             select(func.count()).select_from(Sensor).where(Sensor.account_id == self._account_id)
         )
-        active = await self._session.scalar(
+        # "Actifs" = reellement connectes : actifs ET mesure recente (last_seen_at).
+        # Un capteur debranche cesse d'etre compte des qu'il depasse la fenetre.
+        online = await self._session.scalar(
             select(func.count())
             .select_from(Sensor)
-            .where(Sensor.account_id == self._account_id, Sensor.is_active.is_(True))
+            .where(
+                Sensor.account_id == self._account_id,
+                Sensor.is_active.is_(True),
+                Sensor.last_seen_at.is_not(None),
+                Sensor.last_seen_at >= cutoff,
+            )
         )
         return DashboardSummary(
             sensors_total=total or 0,
-            sensors_active=active or 0,
+            sensors_active=online or 0,
+            offline_after_seconds=settings.sensor_offline_after_seconds,
             latest=await self.latest_readings(),
         )

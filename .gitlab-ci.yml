@@ -114,8 +114,10 @@ backend-test:
   variables:
     POSTGRES_USER: el_haress
     POSTGRES_PASSWORD: dev_password
-    POSTGRES_DB: el_haress
-    DATABASE_URL: 'postgresql+asyncpg://el_haress:dev_password@timescaledb:5432/el_haress'
+    # Base suffixee '_test' : la suite TRUNCATE les tables et refuse toute base
+    # non explicitement de test (garde-fou conftest).
+    POSTGRES_DB: el_haress_test
+    DATABASE_URL: 'postgresql+asyncpg://el_haress:dev_password@timescaledb:5432/el_haress_test'
   before_script:
     - cd backend
     - pip install -e ".[dev]"

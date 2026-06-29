@@ -48,6 +48,9 @@ class SensorRead(BaseModel):
     unit: str | None = None
     is_active: bool
     last_seen_at: datetime | None = None
+    # Connectivite reelle : mesure recente (< fenetre de fraichetur) et capteur actif.
+    # Distinct de `is_active` (drapeau de configuration).
+    online: bool = False
     critical_threshold: float | None = None
     color: str | None = None
 
@@ -82,5 +85,9 @@ class LatestReading(BaseModel):
 
 class DashboardSummary(BaseModel):
     sensors_total: int
+    # Capteurs reellement connectes (mesure recente), pas le drapeau is_active.
     sensors_active: int
+    # Fenetre de fraicheur (secondes) : le front l'utilise pour reevaluer la
+    # connectivite en temps reel et masquer les capteurs muets.
+    offline_after_seconds: float
     latest: list[LatestReading]

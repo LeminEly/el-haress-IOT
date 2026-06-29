@@ -66,7 +66,14 @@ class Settings(BaseSettings):
 
     # -- Collector / passerelle capteurs (STE2 LITE) -----------------------
     ste2_base_url: str = "http://192.168.1.105"
-    collector_poll_interval_seconds: int = 10
+    # Cadence de polling, sous-seconde autorisee (ex. 0.5 = 500 ms) pour un suivi
+    # quasi instantane. Valeur configurable, jamais codee en dur cote metier.
+    collector_poll_interval_seconds: float = 0.5
+    # Fenetre de fraicheur : un capteur dont la derniere mesure est plus ancienne
+    # que ce delai est considere hors-ligne (masque du tableau de bord, conserve
+    # dans l'historique). Court car le polling est sous-seconde ; configurable
+    # selon la cadence de chaque deploiement.
+    sensor_offline_after_seconds: float = 5.0
 
     # -- Notifications (optionnel) -----------------------------------------
     twilio_account_sid: str = ""

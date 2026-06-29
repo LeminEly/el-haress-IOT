@@ -18,7 +18,6 @@ from .sensors_schemas import (
     GatewayCreate,
     GatewayRead,
     ReadingBucket,
-    SensorRead,
     SensorUpdate,
 )
 from .sensors_service import SensorsService
@@ -50,8 +49,7 @@ async def list_sensors(
     context: TenantContext = Depends(get_tenant_context),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
-    sensors = await SensorsService(session, context).list_sensors()
-    return {"data": [SensorRead.model_validate(s) for s in sensors]}
+    return {"data": await SensorsService(session, context).list_sensors_read()}
 
 
 @router.patch("/sensors/{sensor_id}")
@@ -61,8 +59,9 @@ async def update_sensor(
     context: TenantContext = Depends(get_tenant_context),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
-    sensor = await SensorsService(session, context).update_sensor(sensor_id, payload)
-    return {"data": SensorRead.model_validate(sensor)}
+    service = SensorsService(session, context)
+    sensor = await service.update_sensor(sensor_id, payload)
+    return {"data": service.to_read(sensor)}
 
 
 @router.get("/readings")
@@ -74,9 +73,10 @@ async def get_readings(
     end: datetime | None = Query(default=None),
     bucket: ReadingBucket = Query(default=ReadingBucket.RAW),
     limit: int = Query(default=500, ge=1, le=5000),
+    offset: int = Query(default=0, ge=0, le=50000),
 ) -> dict:
     points = await SensorsService(session, context).get_readings(
-        sensor_id=sensor_id, start=start, end=end, bucket=bucket, limit=limit
+        sensor_id=sensor_id, start=start, end=end, bucket=bucket, limit=limit, offset=offset
     )
     return {"data": points}
 

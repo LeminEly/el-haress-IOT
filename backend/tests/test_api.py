@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 from collections.abc import Iterator
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from fakeredis import aioredis as fake_aioredis
@@ -96,6 +96,19 @@ async def _seed_company(phone: str, gateway_ref: str) -> dict[str, uuid.UUID]:
     finally:
         await engine.dispose()
     return ids
+
+
+async def _set_last_seen(sensor_id: uuid.UUID, when: datetime | None) -> None:
+    engine = _engine()
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with factory() as session:
+            sensor = await session.get(Sensor, sensor_id)
+            assert sensor is not None
+            sensor.last_seen_at = when
+            await session.commit()
+    finally:
+        await engine.dispose()
 
 
 @pytest.fixture
@@ -188,6 +201,35 @@ def test_latest_and_dashboard_scoped(client: TestClient) -> None:
 
     summary = client.get("/api/v1/dashboard/summary", headers=_auth(token_a)).json()["data"]
     assert summary["sensors_total"] == 1
+
+
+def test_dashboard_active_counts_only_online_sensors(client: TestClient) -> None:
+    # La connectivite derive de last_seen_at (mis a jour par le collector), pas du
+    # drapeau de configuration is_active. Un capteur muet est hors-ligne.
+    a = _seed_via(client, "+22243000020", "16145")
+    token = _login(client, "+22243000020")
+
+    # Capteur seme sans last_seen_at -> hors-ligne, exclu du compte d'actifs.
+    sensors = client.get("/api/v1/sensors", headers=_auth(token)).json()["data"]
+    assert sensors[0]["online"] is False
+    summary = client.get("/api/v1/dashboard/summary", headers=_auth(token)).json()["data"]
+    assert summary["sensors_total"] == 1
+    assert summary["sensors_active"] == 0
+    assert summary["offline_after_seconds"] > 0
+
+    # Mesure recente -> en ligne et compte comme actif.
+    _run(_set_last_seen(a["sensor"], datetime.now(UTC)))
+    sensors = client.get("/api/v1/sensors", headers=_auth(token)).json()["data"]
+    assert sensors[0]["online"] is True
+    summary = client.get("/api/v1/dashboard/summary", headers=_auth(token)).json()["data"]
+    assert summary["sensors_active"] == 1
+
+    # Mesure trop ancienne (au-dela de la fenetre) -> de nouveau hors-ligne.
+    _run(_set_last_seen(a["sensor"], datetime.now(UTC) - timedelta(hours=1)))
+    sensors = client.get("/api/v1/sensors", headers=_auth(token)).json()["data"]
+    assert sensors[0]["online"] is False
+    summary = client.get("/api/v1/dashboard/summary", headers=_auth(token)).json()["data"]
+    assert summary["sensors_active"] == 0
 
 
 # --- Passerelles et regles d'alerte -----------------------------------------

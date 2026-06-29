@@ -27,6 +27,7 @@
     "sensorsTotal": "Sensors",
     "sensorsActive": "Active",
     "noSensors": "No sensor declared yet.",
+    "noConnected": "No sensor connected right now. Offline sensors remain available in history.",
     "evolution": "Sensor evolution",
     "noData": "No data for this range.",
     "current": "Current value",
