@@ -23,7 +23,7 @@ export function SupervisionChart({
   points,
   unit,
   threshold,
-  color = '#22D3EE',
+  color = 'var(--color-fg)',
 }: SupervisionChartProps) {
   const data = [...points]
     .reverse()

@@ -1,15 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { MultiSensorChart, SERIES_COLORS } from '@/components/multi-sensor-chart';
 import { SensorCard } from '@/components/sensor-card';
 import { EmptyState, ErrorState, LoadingState } from '@/components/states';
 import { SupervisionChart } from '@/components/supervision-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { StatusDot } from '@/components/ui/status-dot';
-import { useDashboardSummary, useReadings, useSensors } from '@/hooks/queries';
+import { useAlertRules, useDashboardSummary, useReadings, useSensors } from '@/hooks/queries';
 import { useLiveReadings } from '@/hooks/use-live';
-import type { SensorStatus } from '@/types/api';
+import { formatValue } from '@/lib/format';
+import { useSettings } from '@/stores/settings';
+import type { AlertRule, ReadingPoint, Sensor, SensorStatus } from '@/types/api';
 
 const STALE_MS = 120_000;
 
@@ -18,42 +22,93 @@ interface LiveEntry {
   recorded_at: string;
 }
 
-function sensorStatus(entry: LiveEntry | undefined, isActive: boolean): SensorStatus {
-  if (!isActive || !entry) {
+function breaches(value: number, rule: AlertRule): boolean {
+  switch (rule.condition) {
+    case 'GT':
+      return value > rule.threshold;
+    case 'GTE':
+      return value >= rule.threshold;
+    case 'LT':
+      return value < rule.threshold;
+    case 'LTE':
+      return value <= rule.threshold;
+    default:
+      return false;
+  }
+}
+
+function sensorStatus(
+  entry: LiveEntry | undefined,
+  sensor: Sensor,
+  rule?: AlertRule,
+): SensorStatus {
+  if (
+    !sensor.is_active ||
+    !entry ||
+    Date.now() - new Date(entry.recorded_at).getTime() > STALE_MS
+  ) {
     return 'offline';
   }
-  return Date.now() - new Date(entry.recorded_at).getTime() > STALE_MS ? 'offline' : 'normal';
+  if (rule && breaches(entry.value, rule)) {
+    return 'critical';
+  }
+  return 'normal';
 }
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const summary = useDashboardSummary();
+  const locale = useSettings((state) => state.locale);
   const sensors = useSensors();
+  const summary = useDashboardSummary();
+  const rules = useAlertRules();
+  const allReadings = useReadings({ limit: 1000 });
+
   const [live, setLive] = useState<Record<string, LiveEntry>>({});
-  const [selected, setSelected] = useState<string | undefined>(undefined);
+  const [points, setPoints] = useState<ReadingPoint[]>([]);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!summary.data) {
-      return;
+    if (summary.data) {
+      const seed: Record<string, LiveEntry> = {};
+      for (const reading of summary.data.latest) {
+        seed[reading.sensor_id] = { value: reading.value, recorded_at: reading.recorded_at };
+      }
+      setLive((previous) => ({ ...seed, ...previous }));
     }
-    const seed: Record<string, LiveEntry> = {};
-    for (const reading of summary.data.latest) {
-      seed[reading.sensor_id] = { value: reading.value, recorded_at: reading.recorded_at };
-    }
-    setLive((previous) => ({ ...seed, ...previous }));
   }, [summary.data]);
 
-  const { connected } = useLiveReadings((reading) =>
+  useEffect(() => {
+    if (allReadings.data) {
+      setPoints(allReadings.data);
+    }
+  }, [allReadings.data]);
+
+  const { connected } = useLiveReadings((reading) => {
     setLive((previous) => ({
       ...previous,
       [reading.sensor_id]: { value: reading.value, recorded_at: reading.recorded_at },
-    })),
-  );
+    }));
+    setPoints((previous) => [reading as ReadingPoint, ...previous].slice(0, 3000));
+  });
 
-  const sensorList = sensors.data ?? [];
-  const selectedId = selected ?? sensorList[0]?.id;
-  const readings = useReadings(selectedId ? { sensor_id: selectedId, limit: 200 } : {});
-  const selectedSensor = sensorList.find((sensor) => sensor.id === selectedId);
+  const sensorList = useMemo(() => sensors.data ?? [], [sensors.data]);
+  const ruleBySensor = useMemo(() => {
+    const map = new Map<string, AlertRule>();
+    for (const rule of rules.data ?? []) {
+      if (rule.sensor_id && !map.has(rule.sensor_id)) {
+        map.set(rule.sensor_id, rule);
+      }
+    }
+    return map;
+  }, [rules.data]);
+  const thresholds = useMemo(() => {
+    const map: Record<string, number | null> = {};
+    for (const sensor of sensorList) {
+      map[sensor.id] = ruleBySensor.get(sensor.id)?.threshold ?? null;
+    }
+    return map;
+  }, [sensorList, ruleBySensor]);
 
   if (sensors.isLoading || summary.isLoading) {
     return <LoadingState />;
@@ -61,6 +116,23 @@ export default function DashboardPage() {
   if (sensors.isError) {
     return <ErrorState onRetry={() => sensors.refetch()} />;
   }
+
+  const visibleSensors = sensorList.filter((sensor) => !hidden.has(sensor.id));
+  const detailSensor = sensorList.find((sensor) => sensor.id === detailId);
+  const detailPoints = detailSensor
+    ? points.filter((point) => point.sensor_id === detailSensor.id)
+    : [];
+
+  const toggle = (id: string) =>
+    setHidden((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,16 +144,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:max-w-md">
         <Card className="p-4">
           <span className="text-sm text-fg-muted">{t('dashboard.sensorsTotal')}</span>
-          <p className="mt-2 text-3xl font-semibold tabular-nums">
+          <p className="mt-1 text-3xl font-semibold tabular-nums">
             {summary.data?.sensors_total ?? 0}
           </p>
         </Card>
         <Card className="p-4">
           <span className="text-sm text-fg-muted">{t('dashboard.sensorsActive')}</span>
-          <p className="mt-2 text-3xl font-semibold tabular-nums">
+          <p className="mt-1 text-3xl font-semibold tabular-nums">
             {summary.data?.sensors_active ?? 0}
           </p>
         </Card>
@@ -101,32 +173,53 @@ export default function DashboardPage() {
                   value={entry?.value}
                   unit={sensor.unit}
                   recordedAt={entry?.recorded_at}
-                  status={sensorStatus(entry, sensor.is_active)}
+                  status={sensorStatus(entry, sensor, ruleBySensor.get(sensor.id))}
+                  onClick={() => setDetailId(sensor.id)}
                 />
               );
             })}
           </div>
 
           <Card>
-            <CardHeader className="flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle>{t('dashboard.evolution')}</CardTitle>
-              <Select
-                className="w-48"
-                value={selectedId}
-                onChange={(event) => setSelected(event.target.value)}
-              >
-                {sensorList.map((sensor) => (
-                  <option key={sensor.id} value={sensor.id}>
-                    {sensor.label}
-                  </option>
-                ))}
-              </Select>
             </CardHeader>
-            <CardContent>
-              {readings.isLoading ? (
-                <LoadingState />
-              ) : readings.data && readings.data.length > 0 ? (
-                <SupervisionChart points={readings.data} unit={selectedSensor?.unit} />
+            <CardContent className="flex flex-col gap-4">
+              {/* Legende : tous les capteurs, chacun a son seuil ; cocher pour afficher. */}
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {sensorList.map((sensor, index) => {
+                  const entry = live[sensor.id];
+                  return (
+                    <label
+                      key={sensor.id}
+                      className="flex cursor-pointer items-center gap-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={!hidden.has(sensor.id)}
+                        onCheckedChange={() => toggle(sensor.id)}
+                      />
+                      <span
+                        className="h-0.5 w-4 rounded-full"
+                        style={{ backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length] }}
+                      />
+                      <span className="text-fg">{sensor.label}</span>
+                      {entry && (
+                        <span className="tabular-nums text-fg-muted">
+                          {formatValue(entry.value, locale)}
+                          {sensor.unit ? ` ${sensor.unit}` : ''}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+
+              {points.length > 0 && visibleSensors.length > 0 ? (
+                <MultiSensorChart
+                  sensors={visibleSensors}
+                  readings={points}
+                  thresholds={thresholds}
+                />
               ) : (
                 <EmptyState message={t('dashboard.noData')} />
               )}
@@ -134,6 +227,43 @@ export default function DashboardPage() {
           </Card>
         </>
       )}
+
+      <Dialog open={detailId !== null} onOpenChange={(open) => !open && setDetailId(null)}>
+        {detailSensor && (
+          <DialogContent>
+            <DialogTitle>{detailSensor.label}</DialogTitle>
+            <div className="mt-1 flex flex-wrap gap-x-6 gap-y-1 text-sm text-fg-muted">
+              <span>
+                {t('dashboard.current')} :{' '}
+                <span className="font-medium text-fg">
+                  {live[detailSensor.id]
+                    ? `${formatValue(live[detailSensor.id].value, locale)}${detailSensor.unit ? ` ${detailSensor.unit}` : ''}`
+                    : '--'}
+                </span>
+              </span>
+              <span>
+                {t('dashboard.threshold')} :{' '}
+                <span className="font-medium text-fg">
+                  {thresholds[detailSensor.id] != null
+                    ? formatValue(thresholds[detailSensor.id] as number, locale)
+                    : t('dashboard.noThreshold')}
+                </span>
+              </span>
+            </div>
+            <div className="mt-4">
+              {detailPoints.length > 0 ? (
+                <SupervisionChart
+                  points={detailPoints}
+                  unit={detailSensor.unit}
+                  threshold={thresholds[detailSensor.id]}
+                />
+              ) : (
+                <EmptyState message={t('dashboard.noData')} />
+              )}
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }

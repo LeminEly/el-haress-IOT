@@ -28,7 +28,10 @@
     "sensorsActive": "Actifs",
     "noSensors": "Aucun capteur declare pour le moment.",
     "evolution": "Evolution des capteurs",
-    "noData": "Aucune donnee sur la periode."
+    "noData": "Aucune donnee sur la periode.",
+    "current": "Valeur actuelle",
+    "threshold": "Seuil",
+    "noThreshold": "Aucun seuil"
   },
   "history": {
     "range": { "1h": "1 h", "6h": "6 h", "24h": "24 h", "7d": "7 j", "30d": "30 j" }

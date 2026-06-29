@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState, ErrorState, LoadingState } from '@/components/states';
 import { SupervisionChart } from '@/components/supervision-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select } from '@/components/ui/select';
+import { Select, SelectItem } from '@/components/ui/select';
 import { useReadings, useSensors } from '@/hooks/queries';
 
 const RANGES = [
@@ -53,24 +53,25 @@ export default function HistoryPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Select
               className="w-44"
+              aria-label={t('settings.sensor')}
               value={selectedId}
-              onChange={(event) => setSelected(event.target.value)}
+              onValueChange={setSelected}
             >
               {sensorList.map((sensor) => (
-                <option key={sensor.id} value={sensor.id}>
+                <SelectItem key={sensor.id} value={sensor.id}>
                   {sensor.label}
-                </option>
+                </SelectItem>
               ))}
             </Select>
             <Select
               className="w-28"
               value={rangeKey}
-              onChange={(event) => setRangeKey(event.target.value as typeof rangeKey)}
+              onValueChange={(value) => setRangeKey(value as typeof rangeKey)}
             >
               {RANGES.map((range) => (
-                <option key={range.key} value={range.key}>
+                <SelectItem key={range.key} value={range.key}>
                   {t(`history.range.${range.key}`)}
-                </option>
+                </SelectItem>
               ))}
             </Select>
           </div>

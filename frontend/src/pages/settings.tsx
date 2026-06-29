@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState, LoadingState } from '@/components/states';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import { Select, SelectItem } from '@/components/ui/select';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import {
   useAlertRules,
@@ -222,27 +223,31 @@ function RulesSection() {
             <Input id="rule-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="rule-sensor">{t('settings.sensor')}</Label>
-            <Select id="rule-sensor" value={sensorId} onChange={(e) => setSensorId(e.target.value)}>
-              <option value="">{t('settings.allSensors')}</option>
+            <Label>{t('settings.sensor')}</Label>
+            <Select
+              aria-label={t('settings.sensor')}
+              value={sensorId || 'all'}
+              onValueChange={(value) => setSensorId(value === 'all' ? '' : value)}
+            >
+              <SelectItem value="all">{t('settings.allSensors')}</SelectItem>
               {(sensors.data ?? []).map((sensor) => (
-                <option key={sensor.id} value={sensor.id}>
+                <SelectItem key={sensor.id} value={sensor.id}>
                   {sensor.label}
-                </option>
+                </SelectItem>
               ))}
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="rule-condition">{t('settings.condition')}</Label>
+            <Label>{t('settings.condition')}</Label>
             <Select
-              id="rule-condition"
+              aria-label={t('settings.condition')}
               value={condition}
-              onChange={(e) => setCondition(e.target.value as AlertCondition)}
+              onValueChange={(value) => setCondition(value as AlertCondition)}
             >
               {CONDITIONS.map((value) => (
-                <option key={value} value={value}>
+                <SelectItem key={value} value={value}>
                   {t(`condition.${value}`)}
-                </option>
+                </SelectItem>
               ))}
             </Select>
           </div>
@@ -258,16 +263,16 @@ function RulesSection() {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="rule-severity">{t('settings.severity')}</Label>
+            <Label>{t('settings.severity')}</Label>
             <Select
-              id="rule-severity"
+              aria-label={t('settings.severity')}
               value={severity}
-              onChange={(e) => setSeverity(e.target.value as AlertSeverity)}
+              onValueChange={(value) => setSeverity(value as AlertSeverity)}
             >
               {SEVERITIES.map((value) => (
-                <option key={value} value={value}>
+                <SelectItem key={value} value={value}>
                   {t(`severity.${value}`)}
-                </option>
+                </SelectItem>
               ))}
             </Select>
           </div>
@@ -285,11 +290,10 @@ function RulesSection() {
             <span className="text-sm font-medium text-fg">{t('settings.channels')}</span>
             <div className="flex flex-wrap gap-3">
               {CHANNELS.map((channel) => (
-                <label key={channel} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
+                <label key={channel} className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox
                     checked={channels.includes(channel)}
-                    onChange={() => toggleChannel(channel)}
+                    onCheckedChange={() => toggleChannel(channel)}
                   />
                   {t(`channel.${channel}`)}
                 </label>

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { LanguageSwitch } from '@/components/language-switch';
+import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +33,10 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-lg border border-border bg-elevated/80 p-6 shadow-lg backdrop-blur-md"
       >
-        <h1 className="text-xl font-semibold tracking-tight">{t('app.name')}</h1>
-        <p className="mt-1 text-sm text-fg-muted">{t('auth.subtitle')}</p>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Logo markClassName="size-9" />
+          <p className="text-sm text-fg-muted">{t('auth.subtitle')}</p>
+        </div>
 
         <div className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { Card } from '@/components/ui/card';
 import { StatusDot } from '@/components/ui/status-dot';
+import { cn } from '@/lib/utils';
 import { formatRelative, formatValue } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
 import type { SensorStatus } from '@/types/api';
@@ -12,13 +12,22 @@ interface SensorCardProps {
   unit?: string | null;
   recordedAt?: string;
   status: SensorStatus;
+  onClick?: () => void;
 }
 
-export function SensorCard({ label, value, unit, recordedAt, status }: SensorCardProps) {
+export function SensorCard({ label, value, unit, recordedAt, status, onClick }: SensorCardProps) {
   const { t } = useTranslation();
   const locale = useSettings((state) => state.locale);
+
   return (
-    <Card className="p-4">
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex flex-col rounded-lg border border-border bg-elevated p-4 text-start transition-colors',
+        'hover:border-fg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-sm text-fg-muted">{label}</span>
         <div className="flex items-center gap-1.5">
@@ -35,6 +44,6 @@ export function SensorCard({ label, value, unit, recordedAt, status }: SensorCar
       <div className="mt-2 text-xs text-fg-subtle">
         {recordedAt ? formatRelative(recordedAt, locale) : t('status.offline')}
       </div>
-    </Card>
+    </button>
   );
 }

@@ -1,9 +1,10 @@
-import { Activity, Bell, GaugeCircle, History, LogOut, Settings, Users } from 'lucide-react';
+import { Bell, GaugeCircle, History, LogOut, Settings, Users } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { LanguageSwitch } from '@/components/language-switch';
+import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { useLogout, useMe } from '@/hooks/use-auth';
@@ -63,9 +64,8 @@ export function AppShell() {
   return (
     <div className="flex min-h-dvh">
       <aside className="hidden w-60 shrink-0 flex-col gap-2 border-e border-border bg-elevated md:flex">
-        <div className="flex items-center gap-2 px-5 py-4">
-          <Activity className="size-5 text-primary" aria-hidden="true" />
-          <span className="text-lg font-semibold tracking-tight">{t('app.name')}</span>
+        <div className="px-5 py-4">
+          <Logo />
         </div>
         <nav className="flex flex-col gap-1 px-3">
           <NavItems items={items} />
