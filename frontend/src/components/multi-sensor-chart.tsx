@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ReferenceLine,
@@ -39,6 +40,13 @@ export function MultiSensorChart({
     .sort((a, b) => a[0] - b[0])
     .map(([t, values]) => ({ t, ...values }));
 
+  const thresholdLines = sensors
+    .filter((s) => thresholds[s.id] != null)
+    .map((s) => ({
+      sensor: s,
+      value: thresholds[s.id] as number,
+    }));
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
@@ -63,6 +71,14 @@ export function MultiSensorChart({
           }}
           labelFormatter={(value) => format(new Date(Number(value)), 'Pp')}
         />
+        <Legend
+          verticalAlign="bottom"
+          height={28}
+          iconType="line"
+          formatter={(value: string) => (
+            <span style={{ color: 'var(--color-fg)', fontSize: 12 }}>{value}</span>
+          )}
+        />
         {sensors.map((sensor, index) => (
           <Line
             key={sensor.id}
@@ -77,17 +93,21 @@ export function MultiSensorChart({
             isAnimationActive={false}
           />
         ))}
-        {sensors.map((sensor) =>
-          thresholds[sensor.id] != null ? (
-            <ReferenceLine
-              key={`threshold-${sensor.id}`}
-              y={thresholds[sensor.id] as number}
-              stroke="var(--color-critical)"
-              strokeDasharray="4 4"
-              strokeWidth={1}
-            />
-          ) : null,
-        )}
+        {thresholdLines.map(({ sensor, value }) => (
+          <ReferenceLine
+            key={`threshold-${sensor.id}`}
+            y={value}
+            stroke="var(--color-critical)"
+            strokeDasharray="4 4"
+            strokeWidth={1}
+            label={{
+              value: `${sensor.label} seuil: ${value}${sensor.unit ? ` ${sensor.unit}` : ''}`,
+              position: 'right',
+              fill: 'var(--color-critical)',
+              fontSize: 10,
+            }}
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );

@@ -69,7 +69,7 @@ export function useDashboardSummary() {
 }
 
 export function useReadings(
-  params: { sensor_id?: string; start?: string; limit?: number },
+  params: { sensor_id?: string; start?: string; end?: string; limit?: number; offset?: number },
   options?: { refetchInterval?: number },
 ) {
   return useQuery({

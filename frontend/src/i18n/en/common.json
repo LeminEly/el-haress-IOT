@@ -34,7 +34,18 @@
     "noThreshold": "No threshold"
   },
   "history": {
-    "range": { "1h": "1h", "6h": "6h", "24h": "24h", "7d": "7d", "30d": "30d" }
+    "range": { "1h": "1h", "6h": "6h", "24h": "24h", "7d": "7d", "30d": "30d", "custom": "Custom" },
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "category": "Category",
+    "allCategories": "All categories",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "page": "Page {page} / {total}",
+    "rowsPerPage": "Rows / page",
+    "noMatchingCategory": "No sensors in this category.",
+    "chartLabel": "{label} ({unit}) — threshold: {threshold} {unit}"
   },
   "alerts": {
     "empty": "No alerts.",
@@ -119,6 +130,17 @@
     "contactEmail": "Contact email",
     "phoneNumber": "Phone number",
     "success": "Account updated."
+  },
+  "category": {
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "gas": "Gas",
+    "smoke": "Smoke",
+    "motion": "Motion",
+    "pressure": "Pressure",
+    "light": "Light",
+    "sound": "Sound",
+    "other": "Other"
   },
   "state": {
     "loading": "Loading...",

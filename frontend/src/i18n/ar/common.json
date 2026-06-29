@@ -34,7 +34,25 @@
     "noThreshold": "لا توجد عتبة"
   },
   "history": {
-    "range": { "1h": "ساعة", "6h": "6 ساعات", "24h": "24 ساعة", "7d": "7 أيام", "30d": "30 يومًا" }
+    "range": {
+      "1h": "ساعة",
+      "6h": "6 ساعات",
+      "24h": "24 ساعة",
+      "7d": "7 أيام",
+      "30d": "30 يومًا",
+      "custom": "مخصص"
+    },
+    "from": "من",
+    "to": "إلى",
+    "apply": "تطبيق",
+    "category": "الفئة",
+    "allCategories": "جميع الفئات",
+    "prevPage": "السابق",
+    "nextPage": "التالي",
+    "page": "الصفحة {page} / {total}",
+    "rowsPerPage": "سطر / صفحة",
+    "noMatchingCategory": "لا توجد مستشعرات في هذه الفئة.",
+    "chartLabel": "{label} ({unit}) — الحد: {threshold} {unit}"
   },
   "alerts": {
     "empty": "لا توجد تنبيهات.",
@@ -119,6 +137,17 @@
     "contactEmail": "البريد الإلكتروني للتواصل",
     "phoneNumber": "رقم الهاتف",
     "success": "تم تحديث الحساب."
+  },
+  "category": {
+    "temperature": "درجة الحرارة",
+    "humidity": "الرطوبة",
+    "gas": "غاز",
+    "smoke": "دخان",
+    "motion": "حركة",
+    "pressure": "الضغط",
+    "light": "الإضاءة",
+    "sound": "الصوت",
+    "other": "أخرى"
   },
   "state": {
     "loading": "جارٍ التحميل...",

@@ -34,7 +34,25 @@
     "noThreshold": "Aucun seuil"
   },
   "history": {
-    "range": { "1h": "1 h", "6h": "6 h", "24h": "24 h", "7d": "7 j", "30d": "30 j" }
+    "range": {
+      "1h": "1 h",
+      "6h": "6 h",
+      "24h": "24 h",
+      "7d": "7 j",
+      "30d": "30 j",
+      "custom": "Personnalise"
+    },
+    "from": "Du",
+    "to": "Au",
+    "apply": "Appliquer",
+    "category": "Categorie",
+    "allCategories": "Toutes les categories",
+    "prevPage": "Precedente",
+    "nextPage": "Suivante",
+    "page": "Page {page} / {total}",
+    "rowsPerPage": "Lignes / page",
+    "noMatchingCategory": "Aucun capteur dans cette categorie.",
+    "chartLabel": "{label} ({unit}) — seuil: {threshold} {unit}"
   },
   "alerts": {
     "empty": "Aucune alerte.",
@@ -119,6 +137,17 @@
     "contactEmail": "Email de contact",
     "phoneNumber": "Numero de telephone",
     "success": "Compte mis a jour."
+  },
+  "category": {
+    "temperature": "Temperature",
+    "humidity": "Humidite",
+    "gas": "Gaz",
+    "smoke": "Fumee",
+    "motion": "Mouvement",
+    "pressure": "Pression",
+    "light": "Luminosite",
+    "sound": "Son",
+    "other": "Autre"
   },
   "state": {
     "loading": "Chargement...",
