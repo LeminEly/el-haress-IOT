@@ -21,6 +21,7 @@ Documentation de developpement et d'exploitation du depot `el-haress-app`.
 | [security.md](security.md)                     | Modele de securite : auth JWT RS256, isolation, anti-abus       |
 | [api-reference.md](api-reference.md)           | Endpoints REST + WebSocket, contrat de reponse                  |
 | [alerting-rules.md](alerting-rules.md)         | Moteur d'alertes : regles, gate/cooldown, notifications         |
+| [deployment.md](deployment.md)                 | Deploiement Pi : systemd, Nginx, Cloudflare Tunnel, durcissement |
 
 ---
 
