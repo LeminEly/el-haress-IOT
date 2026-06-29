@@ -44,7 +44,26 @@ openssl rsa -in keys/private.pem -pubout -out keys/public.pem
 
 ---
 
-## 3. Backend (FastAPI)
+## 3. Base de donnees et Redis (Docker)
+
+Le plus simple en developpement : la stack est fournie via `docker-compose.yml`
+(TimescaleDB + Redis, isolee, conteneurs et volumes dedies).
+
+```bash
+docker compose up -d timescaledb      # base seule (suffit pour migrer)
+docker compose up -d                  # base + redis
+```
+
+Ports hote par defaut : TimescaleDB `5432`, Redis `6380` (surchargeables via
+`POSTGRES_HOST_PORT` / `REDIS_HOST_PORT` pour cohabiter avec d'autres stacks).
+Aligner `DATABASE_URL` et `REDIS_PORT` du `.env` sur ces ports.
+
+> Production sur Raspberry Pi 3 (ARM, 1 Go RAM) : voir les reglages faible-RAM et
+> la compatibilite ARM dans [database-schema.md](database-schema.md) (section 8).
+
+---
+
+## 4. Backend (FastAPI)
 
 ```bash
 cd backend
@@ -52,7 +71,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Migrations base de donnees
+# Migrations base de donnees (TimescaleDB doit tourner)
 alembic upgrade head
 
 # Lancer l'API
@@ -70,7 +89,7 @@ python -m src.collector
 
 ---
 
-## 4. Frontend (React + Vite)
+## 5. Frontend (React + Vite)
 
 ```bash
 cd frontend
@@ -82,7 +101,7 @@ Interface disponible sur `http://localhost:5173`.
 
 ---
 
-## 5. Verifications avant de pousser
+## 6. Verifications avant de pousser
 
 ```bash
 # Backend
