@@ -3,27 +3,101 @@
     "name": "El-Haress",
     "tagline": "Supervision environnementale des salles serveurs"
   },
-  "foundation": {
-    "title": "Socle frontend operationnel",
-    "description": "Theme clair/sombre, multilingue (FR / AR / EN) et tokens du systeme de design sont en place.",
-    "ready": "Pret pour le developpement de l'interface"
+  "theme": { "toggle": "Changer de theme" },
+  "language": { "label": "Langue" },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "history": "Historique",
+    "alerts": "Alertes",
+    "settings": "Parametres",
+    "accounts": "Comptes",
+    "logout": "Deconnexion"
   },
-  "theme": {
-    "toggle": "Changer de theme",
-    "light": "Clair",
-    "dark": "Sombre",
-    "system": "Systeme"
+  "auth": {
+    "subtitle": "Connexion a votre espace de supervision",
+    "phone": "Numero de telephone",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion...",
+    "error": "Identifiants invalides"
   },
-  "language": {
-    "label": "Langue",
-    "fr": "Francais",
-    "ar": "Arabe",
-    "en": "Anglais"
+  "dashboard": {
+    "live": "En direct",
+    "offline": "Hors ligne",
+    "sensorsTotal": "Capteurs",
+    "sensorsActive": "Actifs",
+    "noSensors": "Aucun capteur declare pour le moment.",
+    "evolution": "Evolution des capteurs",
+    "noData": "Aucune donnee sur la periode."
+  },
+  "history": {
+    "range": { "1h": "1 h", "6h": "6 h", "24h": "24 h", "7d": "7 j", "30d": "30 j" }
+  },
+  "alerts": {
+    "empty": "Aucune alerte.",
+    "severity": "Severite",
+    "value": "Valeur",
+    "time": "Horodatage",
+    "status": "Statut",
+    "ack": "Acquitter"
   },
   "status": {
     "normal": "Normal",
     "warning": "A surveiller",
     "critical": "Critique",
     "offline": "Hors ligne"
+  },
+  "severity": {
+    "INFO": "Info",
+    "WARNING": "Avertissement",
+    "CRITICAL": "Critique",
+    "EMERGENCY": "Urgence"
+  },
+  "alertStatus": {
+    "ACTIVE": "Active",
+    "ACKNOWLEDGED": "Acquittee",
+    "RESOLVED": "Resolue"
+  },
+  "accountStatus": { "ACTIVE": "Actif", "SUSPENDED": "Suspendu" },
+  "condition": { "GT": ">", "GTE": ">=", "LT": "<", "LTE": "<=" },
+  "channel": { "whatsapp": "WhatsApp", "sms": "SMS", "email": "Email" },
+  "settings": {
+    "gateways": "Passerelles",
+    "sensors": "Capteurs",
+    "rules": "Regles d'alerte",
+    "name": "Nom",
+    "baseUrl": "Adresse (URL)",
+    "add": "Ajouter",
+    "label": "Libelle",
+    "kind": "Type",
+    "state": "Etat",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "save": "Enregistrer",
+    "disable": "Desactiver",
+    "enable": "Activer",
+    "sensor": "Capteur",
+    "allSensors": "Tous les capteurs",
+    "condition": "Condition",
+    "threshold": "Seuil",
+    "severity": "Severite",
+    "cooldown": "Cooldown (min)",
+    "channels": "Canaux",
+    "addRule": "Ajouter la regle",
+    "delete": "Supprimer"
+  },
+  "accounts": {
+    "create": "Creer un compte entreprise",
+    "company": "Entreprise",
+    "role": "Role",
+    "suspend": "Suspendre",
+    "activate": "Activer",
+    "error": "Creation impossible (numero invalide ou deja utilise)."
+  },
+  "state": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue.",
+    "retry": "Reessayer",
+    "empty": "Aucune donnee."
   }
 }

@@ -3,27 +3,101 @@
     "name": "الحارس",
     "tagline": "مراقبة بيئة غرف الخوادم"
   },
-  "foundation": {
-    "title": "الأساس الأمامي جاهز",
-    "description": "السمة الفاتحة/الداكنة، تعدد اللغات (الفرنسية / العربية / الإنجليزية) ورموز نظام التصميم جاهزة.",
-    "ready": "جاهز لتطوير الواجهة"
+  "theme": { "toggle": "تغيير السمة" },
+  "language": { "label": "اللغة" },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "history": "السجل",
+    "alerts": "التنبيهات",
+    "settings": "الإعدادات",
+    "accounts": "الحسابات",
+    "logout": "تسجيل الخروج"
   },
-  "theme": {
-    "toggle": "تغيير السمة",
-    "light": "فاتح",
-    "dark": "داكن",
-    "system": "النظام"
+  "auth": {
+    "subtitle": "تسجيل الدخول إلى مساحة المراقبة",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "submit": "تسجيل الدخول",
+    "submitting": "جارٍ الدخول...",
+    "error": "بيانات اعتماد غير صالحة"
   },
-  "language": {
-    "label": "اللغة",
-    "fr": "الفرنسية",
-    "ar": "العربية",
-    "en": "الإنجليزية"
+  "dashboard": {
+    "live": "مباشر",
+    "offline": "غير متصل",
+    "sensorsTotal": "المستشعرات",
+    "sensorsActive": "نشطة",
+    "noSensors": "لا يوجد مستشعر معرف حتى الآن.",
+    "evolution": "تطور المستشعرات",
+    "noData": "لا توجد بيانات لهذه الفترة."
+  },
+  "history": {
+    "range": { "1h": "ساعة", "6h": "6 ساعات", "24h": "24 ساعة", "7d": "7 أيام", "30d": "30 يومًا" }
+  },
+  "alerts": {
+    "empty": "لا توجد تنبيهات.",
+    "severity": "الخطورة",
+    "value": "القيمة",
+    "time": "الوقت",
+    "status": "الحالة",
+    "ack": "إقرار"
   },
   "status": {
     "normal": "طبيعي",
     "warning": "للمراقبة",
     "critical": "حرج",
     "offline": "غير متصل"
+  },
+  "severity": {
+    "INFO": "معلومة",
+    "WARNING": "تحذير",
+    "CRITICAL": "حرج",
+    "EMERGENCY": "طارئ"
+  },
+  "alertStatus": {
+    "ACTIVE": "نشط",
+    "ACKNOWLEDGED": "تم الإقرار",
+    "RESOLVED": "تم الحل"
+  },
+  "accountStatus": { "ACTIVE": "نشط", "SUSPENDED": "موقوف" },
+  "condition": { "GT": ">", "GTE": ">=", "LT": "<", "LTE": "<=" },
+  "channel": { "whatsapp": "واتساب", "sms": "رسالة", "email": "بريد" },
+  "settings": {
+    "gateways": "البوابات",
+    "sensors": "المستشعرات",
+    "rules": "قواعد التنبيه",
+    "name": "الاسم",
+    "baseUrl": "العنوان (URL)",
+    "add": "إضافة",
+    "label": "التسمية",
+    "kind": "النوع",
+    "state": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "save": "حفظ",
+    "disable": "تعطيل",
+    "enable": "تفعيل",
+    "sensor": "المستشعر",
+    "allSensors": "كل المستشعرات",
+    "condition": "الشرط",
+    "threshold": "العتبة",
+    "severity": "الخطورة",
+    "cooldown": "فترة التهدئة (دقيقة)",
+    "channels": "القنوات",
+    "addRule": "إضافة قاعدة",
+    "delete": "حذف"
+  },
+  "accounts": {
+    "create": "إنشاء حساب شركة",
+    "company": "الشركة",
+    "role": "الدور",
+    "suspend": "إيقاف",
+    "activate": "تفعيل",
+    "error": "تعذر الإنشاء (رقم غير صالح أو مستخدم)."
+  },
+  "state": {
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ ما.",
+    "retry": "إعادة المحاولة",
+    "empty": "لا توجد بيانات."
   }
 }

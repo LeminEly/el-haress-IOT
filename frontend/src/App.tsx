@@ -1,51 +1,42 @@
-import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
+import { Suspense, lazy } from 'react';
+import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
-import { LanguageSwitch } from '@/components/language-switch';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { AppShell } from '@/components/app-shell';
+import { ProtectedRoute } from '@/components/protected-route';
+import { LoadingState } from '@/components/states';
 
-const STATUSES = [
-  { key: 'normal', dot: 'bg-normal' },
-  { key: 'warning', dot: 'bg-warning' },
-  { key: 'critical', dot: 'bg-critical' },
-  { key: 'offline', dot: 'bg-offline' },
-] as const;
+const LoginPage = lazy(() => import('@/pages/login'));
+const DashboardPage = lazy(() => import('@/pages/dashboard'));
+const HistoryPage = lazy(() => import('@/pages/history'));
+const AlertsPage = lazy(() => import('@/pages/alerts'));
+const SettingsPage = lazy(() => import('@/pages/settings'));
+const AccountsPage = lazy(() => import('@/pages/accounts'));
+
+function lazyPage(node: ReactNode): ReactNode {
+  return <Suspense fallback={<LoadingState />}>{node}</Suspense>;
+}
+
+const router = createBrowserRouter([
+  { path: '/login', element: lazyPage(<LoginPage />) },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <AppShell />,
+        children: [
+          { index: true, element: lazyPage(<DashboardPage />) },
+          { path: 'history', element: lazyPage(<HistoryPage />) },
+          { path: 'alerts', element: lazyPage(<AlertsPage />) },
+          { path: 'settings', element: lazyPage(<SettingsPage />) },
+          { path: 'accounts', element: lazyPage(<AccountsPage />) },
+        ],
+      },
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
+]);
 
 export default function App() {
-  const { t } = useTranslation();
-
-  return (
-    <div className="min-h-dvh">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <div className="flex items-baseline gap-3">
-          <span className="text-lg font-semibold tracking-tight">{t('app.name')}</span>
-          <span className="text-sm text-fg-muted">{t('app.tagline')}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <LanguageSwitch />
-          <ThemeToggle />
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <section className="rounded-lg border border-border bg-elevated p-8">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('foundation.title')}</h1>
-          <p className="mt-3 text-fg-muted">{t('foundation.description')}</p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            {STATUSES.map(({ key, dot }) => (
-              <div
-                key={key}
-                className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2 text-sm"
-              >
-                <span className={`size-2.5 rounded-full ${dot}`} aria-hidden="true" />
-                <span>{t(`status.${key}`)}</span>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-8 text-sm text-fg-subtle">{t('foundation.ready')}</p>
-        </section>
-      </main>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }

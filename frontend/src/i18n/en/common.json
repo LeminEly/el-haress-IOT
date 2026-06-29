@@ -3,27 +3,101 @@
     "name": "El-Haress",
     "tagline": "Server room environmental monitoring"
   },
-  "foundation": {
-    "title": "Frontend foundation ready",
-    "description": "Light/dark theme, multilingual (FR / AR / EN) and design system tokens are in place.",
-    "ready": "Ready for interface development"
+  "theme": { "toggle": "Toggle theme" },
+  "language": { "label": "Language" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "history": "History",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "accounts": "Accounts",
+    "logout": "Log out"
   },
-  "theme": {
-    "toggle": "Toggle theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
+  "auth": {
+    "subtitle": "Sign in to your monitoring workspace",
+    "phone": "Phone number",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "error": "Invalid credentials"
   },
-  "language": {
-    "label": "Language",
-    "fr": "French",
-    "ar": "Arabic",
-    "en": "English"
+  "dashboard": {
+    "live": "Live",
+    "offline": "Offline",
+    "sensorsTotal": "Sensors",
+    "sensorsActive": "Active",
+    "noSensors": "No sensor declared yet.",
+    "evolution": "Sensor evolution",
+    "noData": "No data for this range."
+  },
+  "history": {
+    "range": { "1h": "1h", "6h": "6h", "24h": "24h", "7d": "7d", "30d": "30d" }
+  },
+  "alerts": {
+    "empty": "No alerts.",
+    "severity": "Severity",
+    "value": "Value",
+    "time": "Timestamp",
+    "status": "Status",
+    "ack": "Acknowledge"
   },
   "status": {
     "normal": "Normal",
     "warning": "Warning",
     "critical": "Critical",
     "offline": "Offline"
+  },
+  "severity": {
+    "INFO": "Info",
+    "WARNING": "Warning",
+    "CRITICAL": "Critical",
+    "EMERGENCY": "Emergency"
+  },
+  "alertStatus": {
+    "ACTIVE": "Active",
+    "ACKNOWLEDGED": "Acknowledged",
+    "RESOLVED": "Resolved"
+  },
+  "accountStatus": { "ACTIVE": "Active", "SUSPENDED": "Suspended" },
+  "condition": { "GT": ">", "GTE": ">=", "LT": "<", "LTE": "<=" },
+  "channel": { "whatsapp": "WhatsApp", "sms": "SMS", "email": "Email" },
+  "settings": {
+    "gateways": "Gateways",
+    "sensors": "Sensors",
+    "rules": "Alert rules",
+    "name": "Name",
+    "baseUrl": "Address (URL)",
+    "add": "Add",
+    "label": "Label",
+    "kind": "Type",
+    "state": "State",
+    "active": "Active",
+    "inactive": "Inactive",
+    "save": "Save",
+    "disable": "Disable",
+    "enable": "Enable",
+    "sensor": "Sensor",
+    "allSensors": "All sensors",
+    "condition": "Condition",
+    "threshold": "Threshold",
+    "severity": "Severity",
+    "cooldown": "Cooldown (min)",
+    "channels": "Channels",
+    "addRule": "Add rule",
+    "delete": "Delete"
+  },
+  "accounts": {
+    "create": "Create a company account",
+    "company": "Company",
+    "role": "Role",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "error": "Cannot create (invalid or already used number)."
+  },
+  "state": {
+    "loading": "Loading...",
+    "error": "Something went wrong.",
+    "retry": "Retry",
+    "empty": "No data."
   }
 }

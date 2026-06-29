@@ -12,14 +12,19 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.62.0",
+    "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "i18next": "^24.2.1",
     "i18next-browser-languagedetector": "^8.0.2",
     "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.4.0",
+    "react-router-dom": "^7.1.1",
+    "recharts": "^2.15.0",
     "tailwind-merge": "^2.6.0",
     "zustand": "^5.0.3"
   },
