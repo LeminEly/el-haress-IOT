@@ -1,0 +1,152 @@
+# ============================================================================
+# El-Haress — .gitignore
+# Regle : rien de genere, de local, de volumineux ou de secret ne part au depot.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Secrets et environnement — NE JAMAIS COMMITTER
+# ----------------------------------------------------------------------------
+.env
+.env.*
+*.env
+!.env.example
+keys/
+*.pem
+*.key
+*.p12
+*.pfx
+*.pkcs12
+*.crt
+*.cer
+secrets/
+.secrets/
+*.secret
+*.secrets
+secret.env*
+*-secrets.json
+*-secret.json
+*credentials*.json
+*service-account*.json
+# Cloudflare Tunnel — identifiants du tunnel (acces externe)
+cloudflared/
+*.tunnel.json
+cert.pem
+
+# ----------------------------------------------------------------------------
+# Python (backend FastAPI)
+# ----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Outils de test et qualite
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# ----------------------------------------------------------------------------
+# Node / Frontend (React + Vite)
+# ----------------------------------------------------------------------------
+node_modules/
+frontend/dist/
+frontend/build/
+.vite/
+*.tsbuildinfo
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# ----------------------------------------------------------------------------
+# Base de donnees / dumps / logs locaux — ne jamais committer
+# ----------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+dumps/
+backups/
+*.log
+logs/
+
+# ----------------------------------------------------------------------------
+# Donnees reelles (PII) — ne jamais committer
+# ----------------------------------------------------------------------------
+*.xlsx
+*.csv
+
+# ----------------------------------------------------------------------------
+# OS et editeurs
+# ----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.swp
+*.swo
+.idea/
+*.sublime-workspace
+
+# VSCode — seuls les fichiers utiles a toute l'equipe sont versionnes
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ----------------------------------------------------------------------------
+# Outils d'assistance et configs locales (usage personnel, hors depot)
+# ----------------------------------------------------------------------------
+.claude/
+CLAUDE.md
+AGENTS.md
+.cursor/
+.codex/
+.gemini/
+.qwen/
+.opencode/
+opencode.json
+
+# Memoire de travail locale (notes de session, hors depot)
+MEMOIRE.md
+.memoire/
+
+# ----------------------------------------------------------------------------
+# Divers
+# ----------------------------------------------------------------------------
+tmp/
+.cache/
+*.bak
+*.tmp

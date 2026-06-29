@@ -1,0 +1,90 @@
+# Pipeline GitLab CI — El-Haress
+#
+# Trois preoccupations, dans cet ordre :
+#   1. securite  : aucun secret ne doit exister dans l'historique (gitleaks)
+#   2. qualite   : lint backend (ruff) et frontend (eslint), formatage
+#   3. tests     : suites backend (pytest) et frontend
+#
+# Le depot distant reste propre : un commit qui introduit un secret, casse le
+# lint ou les tests ne passe pas la chaine.
+
+stages:
+  - secrets
+  - lint
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  GIT_DEPTH: "50"
+
+# ---------------------------------------------------------------------------
+# 1. Detection de secrets — bloquant
+# ---------------------------------------------------------------------------
+gitleaks:
+  stage: secrets
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --config .gitleaks.toml --redact --verbose
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+# ---------------------------------------------------------------------------
+# 2. Lint backend — ruff
+# ---------------------------------------------------------------------------
+backend-lint:
+  stage: lint
+  image: python:3.12-slim
+  before_script:
+    - pip install ruff
+  script:
+    - ruff check backend/
+    - ruff format --check backend/
+  rules:
+    - exists:
+        - backend/pyproject.toml
+
+# ---------------------------------------------------------------------------
+# 2bis. Lint frontend — eslint + prettier
+# ---------------------------------------------------------------------------
+frontend-lint:
+  stage: lint
+  image: node:22-slim
+  before_script:
+    - cd frontend && npm ci
+  script:
+    - npm run lint
+    - npx prettier --check .
+  rules:
+    - exists:
+        - frontend/package.json
+
+# ---------------------------------------------------------------------------
+# 3. Tests backend — pytest (couverture services >= 80 %)
+# ---------------------------------------------------------------------------
+backend-test:
+  stage: test
+  image: python:3.12-slim
+  before_script:
+    - pip install -e "backend/[dev]"
+  script:
+    - cd backend && pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+  rules:
+    - exists:
+        - backend/pyproject.toml
+
+# ---------------------------------------------------------------------------
+# 3bis. Tests frontend
+# ---------------------------------------------------------------------------
+frontend-test:
+  stage: test
+  image: node:22-slim
+  before_script:
+    - cd frontend && npm ci
+  script:
+    - npm test
+  rules:
+    - exists:
+        - frontend/package.json
