@@ -43,14 +43,20 @@ async def list_accounts(
 
 
 @router.patch("/{account_id}")
-async def update_account_status(
+async def update_account(
     account_id: uuid.UUID,
     payload: AccountUpdate,
     principal: Principal = Depends(_super_admin),
     session: AsyncSession = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ) -> dict:
-    account = await AccountsService(session, settings).set_status(
-        account_id, payload.status, actor_id=principal.account_id
+    svc = AccountsService(session, settings)
+    account = await svc.update(
+        account_id,
+        actor_id=principal.account_id,
+        company_name=payload.company_name,
+        contact_email=payload.contact_email,
     )
+    if payload.status is not None:
+        account = await svc.set_status(account_id, payload.status, actor_id=principal.account_id)
     return {"data": AccountRead.model_validate(account)}

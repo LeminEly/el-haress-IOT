@@ -15,11 +15,14 @@ class AccountCreate(StrictModel):
     phone_number: str = Field(min_length=6, max_length=32)
     password: str = Field(min_length=10, max_length=128)
     company_name: str = Field(min_length=1, max_length=255)
+    contact_email: str | None = Field(default=None, max_length=255)
     role: AccountRole = AccountRole.COMPANY
 
 
 class AccountUpdate(StrictModel):
-    status: AccountStatus
+    company_name: str | None = Field(default=None, min_length=1, max_length=255)
+    contact_email: str | None = Field(default=None, max_length=255)
+    status: AccountStatus | None = None
 
 
 class AccountRead(BaseModel):
@@ -28,6 +31,7 @@ class AccountRead(BaseModel):
     id: uuid.UUID
     phone_number: str
     company_name: str
+    contact_email: str | None = None
     role: AccountRole
     status: AccountStatus
     created_at: datetime

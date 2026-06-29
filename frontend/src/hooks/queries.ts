@@ -30,6 +30,8 @@ export function useUpdateSensor() {
       label?: string;
       kind?: string;
       is_active?: boolean;
+      critical_threshold?: number | null;
+      color?: string | null;
     }) => apiClient.patch(`/sensors/${id}`, body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sensors'] }),
   });
@@ -54,7 +56,7 @@ export function useLatestReadings() {
   return useQuery({
     queryKey: ['readings', 'latest'],
     queryFn: () => getData<LatestReading[]>('/readings/latest'),
-    refetchInterval: 20_000,
+    refetchInterval: 5_000,
   });
 }
 
@@ -62,14 +64,18 @@ export function useDashboardSummary() {
   return useQuery({
     queryKey: ['dashboard', 'summary'],
     queryFn: () => getData<DashboardSummary>('/dashboard/summary'),
-    refetchInterval: 20_000,
+    refetchInterval: 5_000,
   });
 }
 
-export function useReadings(params: { sensor_id?: string; start?: string; limit?: number }) {
+export function useReadings(
+  params: { sensor_id?: string; start?: string; limit?: number },
+  options?: { refetchInterval?: number },
+) {
   return useQuery({
     queryKey: ['readings', params],
     queryFn: () => getData<ReadingPoint[]>('/readings', params),
+    ...options,
   });
 }
 
@@ -128,8 +134,28 @@ export function useAccounts() {
 export function useCreateAccount() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { phone_number: string; password: string; company_name: string }) =>
-      apiClient.post('/accounts', body),
+    mutationFn: (body: {
+      phone_number: string;
+      password: string;
+      company_name: string;
+      contact_email?: string;
+    }) => apiClient.post('/accounts', body),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
+  });
+}
+
+export function useUpdateAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...body
+    }: {
+      id: string;
+      company_name?: string;
+      contact_email?: string | null;
+      status?: 'ACTIVE' | 'SUSPENDED';
+    }) => apiClient.patch(`/accounts/${id}`, body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
   });
 }

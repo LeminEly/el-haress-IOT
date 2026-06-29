@@ -22,6 +22,7 @@ export interface AccountProfile {
   id: string;
   phone_number: string;
   company_name: string;
+  contact_email: string | null;
   role: AccountRole;
   status: AccountStatus;
   last_login_at: string | null;
@@ -50,6 +51,8 @@ export interface Sensor {
   unit: string | null;
   is_active: boolean;
   last_seen_at: string | null;
+  critical_threshold: number | null;
+  color: string | null;
 }
 
 export interface ReadingPoint {

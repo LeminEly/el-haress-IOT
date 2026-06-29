@@ -86,16 +86,39 @@
     "severity": "Severite",
     "cooldown": "Cooldown (min)",
     "channels": "Canaux",
+    "criticalThreshold": "Seuil critique",
+    "curveColor": "Couleur courbe",
+    "clear": "Effacer",
     "addRule": "Ajouter la regle",
     "delete": "Supprimer"
   },
   "accounts": {
     "create": "Creer un compte entreprise",
     "company": "Entreprise",
+    "contactEmail": "Email de contact",
     "role": "Role",
+    "status": "Statut",
+    "lastLogin": "Derniere connexion",
+    "createdAt": "Date de creation",
+    "phone": "Telephone",
     "suspend": "Suspendre",
     "activate": "Activer",
-    "error": "Creation impossible (numero invalide ou deja utilise)."
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirmSuspend": "Suspendre ce compte ?",
+    "confirmSuspendDesc": "L'entreprise ne pourra plus se connecter. Vous pourrez la reactiver a tout moment.",
+    "confirmActivate": "Reactiver ce compte ?",
+    "confirmActivateDesc": "L'entreprise pourra de nouveau acceder a la plateforme.",
+    "error": "Creation impossible (numero invalide ou deja utilise).",
+    "search": "Rechercher par entreprise ou telephone..."
+  },
+  "accountsEdit": {
+    "title": "Modifier le compte",
+    "companyName": "Nom de l'entreprise",
+    "contactEmail": "Email de contact",
+    "phoneNumber": "Numero de telephone",
+    "success": "Compte mis a jour."
   },
   "state": {
     "loading": "Chargement...",

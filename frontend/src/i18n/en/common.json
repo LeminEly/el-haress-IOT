@@ -86,16 +86,39 @@
     "severity": "Severity",
     "cooldown": "Cooldown (min)",
     "channels": "Channels",
+    "criticalThreshold": "Critical threshold",
+    "curveColor": "Curve color",
+    "clear": "Clear",
     "addRule": "Add rule",
     "delete": "Delete"
   },
   "accounts": {
     "create": "Create a company account",
     "company": "Company",
+    "contactEmail": "Contact email",
     "role": "Role",
+    "status": "Status",
+    "lastLogin": "Last login",
+    "createdAt": "Created at",
+    "phone": "Phone",
     "suspend": "Suspend",
     "activate": "Activate",
-    "error": "Cannot create (invalid or already used number)."
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmSuspend": "Suspend this account?",
+    "confirmSuspendDesc": "The company will not be able to log in. You can reactivate it at any time.",
+    "confirmActivate": "Reactivate this account?",
+    "confirmActivateDesc": "The company will be able to access the platform again.",
+    "error": "Cannot create (invalid or already used number).",
+    "search": "Search by company or phone..."
+  },
+  "accountsEdit": {
+    "title": "Edit account",
+    "companyName": "Company name",
+    "contactEmail": "Contact email",
+    "phoneNumber": "Phone number",
+    "success": "Account updated."
   },
   "state": {
     "loading": "Loading...",

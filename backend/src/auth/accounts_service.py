@@ -42,6 +42,7 @@ class AccountsService:
             phone_number=normalized,
             password_hash=hash_password(data.password, rounds=self._settings.bcrypt_rounds),
             company_name=data.company_name,
+            contact_email=data.contact_email,
             role=data.role,
             status=AccountStatus.ACTIVE,
         )
@@ -84,4 +85,40 @@ class AccountsService:
         )
         await self._session.commit()
         await self._session.refresh(account)
+        return account
+
+    async def update(
+        self,
+        account_id: uuid.UUID,
+        *,
+        actor_id: uuid.UUID,
+        company_name: str | None = None,
+        contact_email: str | None = None,
+    ) -> Account:
+        account = await self._session.get(Account, account_id)
+        if account is None:
+            raise ProblemException(404, "Compte introuvable")
+
+        changed: dict[str, str] = {}
+        if company_name is not None and company_name != account.company_name:
+            changed["company_name"] = f"{account.company_name} -> {company_name}"
+            account.company_name = company_name
+        if contact_email is not None and contact_email != account.contact_email:
+            changed["contact_email"] = f"{account.contact_email or ''} -> {contact_email}"
+            account.contact_email = contact_email
+
+        if changed:
+            self._session.add(
+                AuditLog(
+                    actor_account_id=actor_id,
+                    account_id=account.id,
+                    action="account.update",
+                    entity_type="account",
+                    entity_id=account.id,
+                    data=changed,
+                )
+            )
+            await self._session.commit()
+            await self._session.refresh(account)
+
         return account

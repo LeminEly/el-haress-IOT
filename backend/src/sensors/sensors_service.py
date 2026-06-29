@@ -77,12 +77,10 @@ class SensorsService:
 
     async def update_sensor(self, sensor_id: uuid.UUID, data: SensorUpdate) -> Sensor:
         sensor = await self._get_owned_sensor(sensor_id)
-        if data.label is not None:
-            sensor.label = data.label
-        if data.kind is not None:
-            sensor.kind = data.kind
-        if data.is_active is not None:
-            sensor.is_active = data.is_active
+        # exclude_unset : seuls les champs reellement fournis sont modifies
+        # (permet de remettre un seuil a None explicitement).
+        for key, value in data.model_dump(exclude_unset=True).items():
+            setattr(sensor, key, value)
         await self._session.commit()
         await self._session.refresh(sensor)
         return sensor

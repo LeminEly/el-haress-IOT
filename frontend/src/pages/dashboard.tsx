@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { MultiSensorChart, SERIES_COLORS } from '@/components/multi-sensor-chart';
+import { MultiSensorChart } from '@/components/multi-sensor-chart';
 import { SensorCard } from '@/components/sensor-card';
 import { EmptyState, ErrorState, LoadingState } from '@/components/states';
 import { SupervisionChart } from '@/components/supervision-chart';
@@ -9,11 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { StatusDot } from '@/components/ui/status-dot';
-import { useAlertRules, useDashboardSummary, useReadings, useSensors } from '@/hooks/queries';
+import { useDashboardSummary, useReadings, useSensors } from '@/hooks/queries';
 import { useLiveReadings } from '@/hooks/use-live';
 import { formatValue } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
-import type { AlertRule, ReadingPoint, Sensor, SensorStatus } from '@/types/api';
+import type { ReadingPoint, Sensor, SensorStatus } from '@/types/api';
 
 const STALE_MS = 120_000;
 
@@ -22,26 +22,7 @@ interface LiveEntry {
   recorded_at: string;
 }
 
-function breaches(value: number, rule: AlertRule): boolean {
-  switch (rule.condition) {
-    case 'GT':
-      return value > rule.threshold;
-    case 'GTE':
-      return value >= rule.threshold;
-    case 'LT':
-      return value < rule.threshold;
-    case 'LTE':
-      return value <= rule.threshold;
-    default:
-      return false;
-  }
-}
-
-function sensorStatus(
-  entry: LiveEntry | undefined,
-  sensor: Sensor,
-  rule?: AlertRule,
-): SensorStatus {
+function sensorStatus(entry: LiveEntry | undefined, sensor: Sensor): SensorStatus {
   if (
     !sensor.is_active ||
     !entry ||
@@ -49,7 +30,7 @@ function sensorStatus(
   ) {
     return 'offline';
   }
-  if (rule && breaches(entry.value, rule)) {
+  if (sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
     return 'critical';
   }
   return 'normal';
@@ -60,7 +41,6 @@ export default function DashboardPage() {
   const locale = useSettings((state) => state.locale);
   const sensors = useSensors();
   const summary = useDashboardSummary();
-  const rules = useAlertRules();
   const allReadings = useReadings({ limit: 1000 });
 
   const [live, setLive] = useState<Record<string, LiveEntry>>({});
@@ -93,22 +73,13 @@ export default function DashboardPage() {
   });
 
   const sensorList = useMemo(() => sensors.data ?? [], [sensors.data]);
-  const ruleBySensor = useMemo(() => {
-    const map = new Map<string, AlertRule>();
-    for (const rule of rules.data ?? []) {
-      if (rule.sensor_id && !map.has(rule.sensor_id)) {
-        map.set(rule.sensor_id, rule);
-      }
-    }
-    return map;
-  }, [rules.data]);
   const thresholds = useMemo(() => {
     const map: Record<string, number | null> = {};
     for (const sensor of sensorList) {
-      map[sensor.id] = ruleBySensor.get(sensor.id)?.threshold ?? null;
+      map[sensor.id] = sensor.critical_threshold;
     }
     return map;
-  }, [sensorList, ruleBySensor]);
+  }, [sensorList]);
 
   if (sensors.isLoading || summary.isLoading) {
     return <LoadingState />;
@@ -173,7 +144,7 @@ export default function DashboardPage() {
                   value={entry?.value}
                   unit={sensor.unit}
                   recordedAt={entry?.recorded_at}
-                  status={sensorStatus(entry, sensor, ruleBySensor.get(sensor.id))}
+                  status={sensorStatus(entry, sensor)}
                   onClick={() => setDetailId(sensor.id)}
                 />
               );
@@ -187,7 +158,7 @@ export default function DashboardPage() {
             <CardContent className="flex flex-col gap-4">
               {/* Legende : tous les capteurs, chacun a son seuil ; cocher pour afficher. */}
               <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {sensorList.map((sensor, index) => {
+                {sensorList.map((sensor) => {
                   const entry = live[sensor.id];
                   return (
                     <label
@@ -200,7 +171,7 @@ export default function DashboardPage() {
                       />
                       <span
                         className="h-0.5 w-4 rounded-full"
-                        style={{ backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length] }}
+                        style={{ backgroundColor: sensor.color || 'var(--color-fg)' }}
                       />
                       <span className="text-fg">{sensor.label}</span>
                       {entry && (

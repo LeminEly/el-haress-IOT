@@ -86,16 +86,39 @@
     "severity": "الخطورة",
     "cooldown": "فترة التهدئة (دقيقة)",
     "channels": "القنوات",
+    "criticalThreshold": "العتبة الحرجة",
+    "curveColor": "لون المنحنى",
+    "clear": "مسح",
     "addRule": "إضافة قاعدة",
     "delete": "حذف"
   },
   "accounts": {
     "create": "إنشاء حساب شركة",
     "company": "الشركة",
+    "contactEmail": "البريد الإلكتروني للتواصل",
     "role": "الدور",
+    "status": "الحالة",
+    "lastLogin": "آخر تسجيل دخول",
+    "createdAt": "تاريخ الإنشاء",
+    "phone": "الهاتف",
     "suspend": "إيقاف",
     "activate": "تفعيل",
-    "error": "تعذر الإنشاء (رقم غير صالح أو مستخدم)."
+    "edit": "تعديل",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirmSuspend": "إيقاف هذا الحساب؟",
+    "confirmSuspendDesc": "لن تتمكن الشركة من تسجيل الدخول. يمكنك إعادة تفعيلها في أي وقت.",
+    "confirmActivate": "إعادة تفعيل هذا الحساب؟",
+    "confirmActivateDesc": "ستتمكن الشركة من الوصول إلى المنصة مرة أخرى.",
+    "error": "تعذر الإنشاء (رقم غير صالح أو مستخدم).",
+    "search": "البحث بالشركة أو الهاتف..."
+  },
+  "accountsEdit": {
+    "title": "تعديل الحساب",
+    "companyName": "اسم الشركة",
+    "contactEmail": "البريد الإلكتروني للتواصل",
+    "phoneNumber": "رقم الهاتف",
+    "success": "تم تحديث الحساب."
   },
   "state": {
     "loading": "جارٍ التحميل...",

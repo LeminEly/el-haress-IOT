@@ -32,6 +32,8 @@ class SensorUpdate(StrictModel):
     label: str | None = Field(default=None, min_length=1, max_length=255)
     kind: str | None = Field(default=None, min_length=1, max_length=64)
     is_active: bool | None = None
+    critical_threshold: float | None = None
+    color: str | None = Field(default=None, max_length=16)
 
 
 class SensorRead(BaseModel):
@@ -46,6 +48,8 @@ class SensorRead(BaseModel):
     unit: str | None = None
     is_active: bool
     last_seen_at: datetime | None = None
+    critical_threshold: float | None = None
+    color: str | None = None
 
 
 class ReadingBucket(enum.StrEnum):

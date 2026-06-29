@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { LanguageSwitch } from '@/components/language-switch';
-import { Logo } from '@/components/logo';
+import { LogoMark } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,50 +25,52 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center p-4">
-      <div className="absolute end-4 top-4 flex gap-2">
+      <div className="absolute end-4 top-4 z-10 flex gap-2">
         <LanguageSwitch />
         <ThemeToggle />
       </div>
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-lg border border-border bg-elevated/80 p-6 shadow-lg backdrop-blur-md"
-      >
-        <div className="flex flex-col items-center gap-2 text-center">
-          <Logo markClassName="size-9" />
-          <p className="text-sm text-fg-muted">{t('auth.subtitle')}</p>
+      <div className="flex w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-elevated/80 shadow-lg backdrop-blur-md md:flex-row">
+        <div className="flex flex-col items-center justify-center gap-3 bg-surface p-8 md:w-5/12 md:p-10">
+          <LogoMark className="size-28 text-fg md:size-36" />
         </div>
-
-        <div className="mt-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="phone">{t('auth.phone')}</Label>
-            <Input
-              id="phone"
-              type="tel"
-              dir="ltr"
-              autoComplete="username"
-              placeholder="+222..."
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              required
-            />
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-1 flex-col justify-center gap-6 p-8 md:p-10"
+        >
+          <p className="text-balance text-sm text-fg-muted">{t('auth.subtitle')}</p>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="phone">{t('auth.phone')}</Label>
+              <Input
+                id="phone"
+                type="tel"
+                dir="ltr"
+                autoComplete="username"
+                placeholder="+222..."
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </div>
+            {login.isError && <p className="text-sm text-critical">{t('auth.error')}</p>}
+            <Button type="submit" disabled={login.isPending}>
+              {login.isPending ? t('auth.submitting') : t('auth.submit')}
+            </Button>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">{t('auth.password')}</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </div>
-          {login.isError && <p className="text-sm text-critical">{t('auth.error')}</p>}
-          <Button type="submit" disabled={login.isPending}>
-            {login.isPending ? t('auth.submitting') : t('auth.submit')}
-          </Button>
-        </div>
-      </form>
+          <p className="text-center text-xs text-fg-subtle">{t('app.name')}</p>
+        </form>
+      </div>
     </div>
   );
 }

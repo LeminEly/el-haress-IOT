@@ -12,8 +12,7 @@ import {
 
 import type { ReadingPoint, Sensor } from '@/types/api';
 
-// Palette monochrome (foreground + nuances de gris) : distinction sans couleur.
-export const SERIES_COLORS = ['var(--color-fg)', '#a1a1aa', '#52525b', '#71717a', '#d4d4d8'];
+const SERIES_FALLBACK = ['var(--color-fg)', '#a1a1aa', '#52525b', '#71717a', '#d4d4d8'];
 const SERIES_DASH = ['0', '5 3', '2 2', '8 3', '4 4'];
 
 interface MultiSensorChartProps {
@@ -70,7 +69,7 @@ export function MultiSensorChart({
             type="monotone"
             dataKey={sensor.id}
             name={sensor.label}
-            stroke={SERIES_COLORS[index % SERIES_COLORS.length]}
+            stroke={sensor.color || SERIES_FALLBACK[index % SERIES_FALLBACK.length]}
             strokeWidth={2}
             strokeDasharray={SERIES_DASH[index % SERIES_DASH.length]}
             dot={false}

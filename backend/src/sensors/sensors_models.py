@@ -59,6 +59,9 @@ class Sensor(UUIDPrimaryKeyMixin, TimestampMixin, TenantMixin, Base):
     unit: Mapped[str | None] = mapped_column(String(16))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Configuration par capteur : seuil critique (affichage/statut) et couleur de courbe.
+    critical_threshold: Mapped[float | None] = mapped_column(Double)
+    color: Mapped[str | None] = mapped_column(String(16))
 
     __table_args__ = (
         UniqueConstraint("gateway_id", "gateway_ref", name="uq_sensors_gateway_id_gateway_ref"),

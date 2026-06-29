@@ -33,6 +33,7 @@ class AccountProfile(BaseModel):
     id: uuid.UUID
     phone_number: str
     company_name: str
+    contact_email: str | None = None
     role: AccountRole
     status: AccountStatus
     last_login_at: datetime | None = None
