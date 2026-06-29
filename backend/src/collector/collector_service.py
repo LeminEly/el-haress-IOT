@@ -8,8 +8,11 @@ une panne reseau ou base sur une passerelle n'interrompt pas le cycle.
 
 from __future__ import annotations
 
+import uuid
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from sqlalchemy import select
@@ -22,6 +25,9 @@ from ..sensors.ste2_parser import infer_kind
 
 logger = structlog.get_logger(__name__)
 
+# Publie une mesure pour diffusion temps reel (account_id, payload).
+Publisher = Callable[[uuid.UUID, dict[str, Any]], Awaitable[None]]
+
 
 @dataclass
 class GatewayResult:
@@ -33,9 +39,15 @@ class GatewayResult:
 
 
 class CollectorService:
-    def __init__(self, session_factory: async_sessionmaker, client: SampleSource) -> None:
+    def __init__(
+        self,
+        session_factory: async_sessionmaker,
+        client: SampleSource,
+        publisher: Publisher | None = None,
+    ) -> None:
         self._session_factory = session_factory
         self._client = client
+        self._publisher = publisher
 
     async def run_cycle(self) -> list[GatewayResult]:
         async with self._session_factory() as session:
@@ -55,6 +67,7 @@ class CollectorService:
         now = datetime.now(UTC)
         inserted = 0
         mute = 0
+        published: list[dict[str, Any]] = []
         try:
             async with self._session_factory() as session:
                 existing = {
@@ -93,6 +106,13 @@ class CollectorService:
                         )
                         sensor.last_seen_at = now
                         inserted += 1
+                        published.append(
+                            {
+                                "sensor_id": str(sensor.id),
+                                "value": sample.value,
+                                "recorded_at": now.isoformat(),
+                            }
+                        )
                     elif not sample.valid:
                         mute += 1
 
@@ -103,6 +123,11 @@ class CollectorService:
         except SQLAlchemyError as exc:  # backpressure : base indisponible
             logger.error("gateway_persist_failed", gateway_id=gateway_id, error=str(exc))
             return GatewayResult(gateway_id, len(samples), 0, 0, error=str(exc))
+
+        # Diffusion temps reel apres commit (donnees visibles par les consommateurs).
+        if self._publisher is not None:
+            for payload in published:
+                await self._publisher(gateway.account_id, payload)
 
         logger.info(
             "gateway_polled",

@@ -34,9 +34,19 @@ def blacklist_redis() -> Redis:
     return _make_client(get_settings().redis_db_jwt_blacklist)
 
 
+@cache
+def pubsub_redis() -> Redis:
+    # Diffusion temps reel (pub/sub) : base cache.
+    return _make_client(get_settings().redis_db_cache)
+
+
 async def get_ratelimit_redis() -> Redis:
     return ratelimit_redis()
 
 
 async def get_blacklist_redis() -> Redis:
     return blacklist_redis()
+
+
+async def get_pubsub_redis() -> Redis:
+    return pubsub_redis()

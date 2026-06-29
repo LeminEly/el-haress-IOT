@@ -19,6 +19,7 @@ Documentation de developpement et d'exploitation du depot `el-haress-app`.
 | [sensor-system-ste2.md](sensor-system-ste2.md) | Passerelle capteurs HWg STE2 LITE : protocole, parsing, conflits |
 | [database-schema.md](database-schema.md)       | Schema TimescaleDB : tables, hypertable, retention, Raspberry Pi |
 | [security.md](security.md)                     | Modele de securite : auth JWT RS256, isolation, anti-abus       |
+| [api-reference.md](api-reference.md)           | Endpoints REST + WebSocket, contrat de reponse                  |
 
 ---
 
