@@ -43,20 +43,40 @@ Un compte = une entreprise. C'est la racine de tenance : pas d'`account_id` prop
 | status         | varchar      | `ACTIVE` \| `SUSPENDED` (CHECK)                 |
 | created_at / updated_at | timestamptz |                                       |
 
-### sensors — capteurs declares
+### gateways — passerelles physiques (STE2 LITE)
+
+Une passerelle appartient a une entreprise ; c'est elle qui resout l'`account_id`
+des mesures (aucun `account_id` en dur dans le collector). Prepare le multi-site.
+
+| Colonne               | Type         | Notes                                       |
+| --------------------- | ------------ | ------------------------------------------- |
+| id                    | uuid PK      |                                             |
+| account_id            | uuid FK NN   | -> accounts(id) ON DELETE CASCADE           |
+| name                  | varchar(255) |                                             |
+| base_url              | varchar(255) | ex. `http://192.168.1.105`                  |
+| poll_interval_seconds | integer      | intervalle de polling (configurable)        |
+| is_active             | boolean      |                                             |
+| last_polled_at        | timestamptz  | dernier cycle de collecte                    |
+
+### sensors — capteurs (rattaches a une passerelle)
 
 | Colonne      | Type         | Notes                                              |
 | ------------ | ------------ | -------------------------------------------------- |
 | id           | uuid PK      |                                                    |
 | account_id   | uuid FK NN   | -> accounts(id) ON DELETE CASCADE                  |
-| hardware_id  | varchar(64)  | identite stable (SenId 1-Wire du STE2)             |
-| gateway_ref  | varchar(64)  | reference passerelle (informative)                 |
-| label        | varchar(255) | libelle editable                                   |
-| kind         | varchar(64)  | generique : `temperature`, `flood`, ... (jamais en dur) |
+| gateway_id   | uuid FK NN   | -> gateways(id) ON DELETE CASCADE                  |
+| gateway_ref  | varchar(64)  | identifiant du point de mesure (cle d'appariement) |
+| hardware_id  | varchar(64)  | SenId 1-Wire (identite stable), si connu (nullable)|
+| label        | varchar(255) | libelle (issu de la passerelle, editable)          |
+| kind         | varchar(64)  | generique : `temperature`, ... (jamais en dur)     |
 | unit         | varchar(16)  | `C`, `%`, ...                                       |
 | is_active    | boolean      |                                                    |
+| last_seen_at | timestamptz  | derniere mesure valide (detection capteur muet)    |
 
-Contraintes : `UNIQUE (account_id, hardware_id)` ; index `(account_id)`.
+Contraintes : `UNIQUE (gateway_id, gateway_ref)` ; index `(account_id)`, `(gateway_id)`.
+
+Le collector auto-provisionne les capteurs vus sur une passerelle (decouverte
+dynamique) et insere une mesure pour chaque echantillon valide.
 
 ### readings — mesures (HYPERTABLE TimescaleDB)
 

@@ -1,0 +1,26 @@
+# Service collector El-Haress (polling des capteurs via STE2 LITE).
+# Process distinct du serveur web. Chemins finalises en phase de deploiement.
+
+[Unit]
+Description=El-Haress collector (polling capteurs)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=el-haress
+Group=el-haress
+WorkingDirectory=/opt/el-haress/backend
+EnvironmentFile=/opt/el-haress/.env
+ExecStart=/opt/el-haress/backend/.venv/bin/python -m src.collector
+Restart=always
+RestartSec=5
+
+# Durcissement
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
