@@ -9,7 +9,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..core.schemas import StrictModel
-from .alerting_models import AlertCondition, AlertSeverity
+from .alerting_models import AlertCondition, AlertSeverity, AlertStatus
 
 
 class AlertChannel(enum.StrEnum):
@@ -55,3 +55,16 @@ class AlertRuleRead(BaseModel):
     channels: list[str]
     is_active: bool
     created_at: datetime
+
+
+class AlertRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    alert_rule_id: uuid.UUID | None = None
+    sensor_id: uuid.UUID | None = None
+    severity: AlertSeverity
+    value: float
+    status: AlertStatus
+    triggered_at: datetime
+    acknowledged_at: datetime | None = None

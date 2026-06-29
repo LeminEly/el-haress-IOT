@@ -40,6 +40,11 @@ def pubsub_redis() -> Redis:
     return _make_client(get_settings().redis_db_cache)
 
 
+@cache
+def alert_dedup_redis() -> Redis:
+    return _make_client(get_settings().redis_db_alert_dedup)
+
+
 async def get_ratelimit_redis() -> Redis:
     return ratelimit_redis()
 

@@ -4,15 +4,37 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.session import get_session
 from ..tenancy.tenancy import TenantContext, get_tenant_context
-from .alerting_schemas import AlertRuleCreate, AlertRuleRead, AlertRuleUpdate
+from .alerting_models import AlertStatus
+from .alerting_schemas import AlertRead, AlertRuleCreate, AlertRuleRead, AlertRuleUpdate
 from .alerting_service import AlertingService
 
 router = APIRouter(prefix="/alert-rules", tags=["alert-rules"])
+alerts_router = APIRouter(prefix="/alerts", tags=["alerts"])
+
+
+@alerts_router.get("")
+async def list_alerts(
+    context: TenantContext = Depends(get_tenant_context),
+    session: AsyncSession = Depends(get_session),
+    status_filter: AlertStatus | None = Query(default=None, alias="status"),
+) -> dict:
+    alerts = await AlertingService(session, context).list_alerts(status=status_filter)
+    return {"data": [AlertRead.model_validate(a) for a in alerts]}
+
+
+@alerts_router.post("/{alert_id}/ack")
+async def acknowledge_alert(
+    alert_id: uuid.UUID,
+    context: TenantContext = Depends(get_tenant_context),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    alert = await AlertingService(session, context).acknowledge_alert(alert_id)
+    return {"data": AlertRead.model_validate(alert)}
 
 
 @router.get("")

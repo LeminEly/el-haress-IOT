@@ -27,6 +27,8 @@ logger = structlog.get_logger(__name__)
 
 # Publie une mesure pour diffusion temps reel (account_id, payload).
 Publisher = Callable[[uuid.UUID, dict[str, Any]], Awaitable[None]]
+# Evalue une mesure contre le moteur d'alertes (account_id, sensor_id, value, recorded_at).
+Evaluator = Callable[[uuid.UUID, uuid.UUID, float, datetime], Awaitable[None]]
 
 
 @dataclass
@@ -44,10 +46,12 @@ class CollectorService:
         session_factory: async_sessionmaker,
         client: SampleSource,
         publisher: Publisher | None = None,
+        evaluator: Evaluator | None = None,
     ) -> None:
         self._session_factory = session_factory
         self._client = client
         self._publisher = publisher
+        self._evaluator = evaluator
 
     async def run_cycle(self) -> list[GatewayResult]:
         async with self._session_factory() as session:
@@ -68,6 +72,7 @@ class CollectorService:
         inserted = 0
         mute = 0
         published: list[dict[str, Any]] = []
+        events: list[tuple[uuid.UUID, float]] = []
         try:
             async with self._session_factory() as session:
                 existing = {
@@ -113,6 +118,7 @@ class CollectorService:
                                 "recorded_at": now.isoformat(),
                             }
                         )
+                        events.append((sensor.id, sample.value))
                     elif not sample.valid:
                         mute += 1
 
@@ -128,6 +134,11 @@ class CollectorService:
         if self._publisher is not None:
             for payload in published:
                 await self._publisher(gateway.account_id, payload)
+
+        # Evaluation des alertes apres commit (mesures persistees).
+        if self._evaluator is not None:
+            for sensor_id, value in events:
+                await self._evaluator(gateway.account_id, sensor_id, value, now)
 
         logger.info(
             "gateway_polled",

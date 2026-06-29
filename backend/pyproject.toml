@@ -23,6 +23,7 @@ dependencies = [
   "bcrypt>=4.2",
   "phonenumbers>=8.13",
   "defusedxml>=0.7",
+  "aiosmtplib>=3.0",
 ]
 
 [project.optional-dependencies]

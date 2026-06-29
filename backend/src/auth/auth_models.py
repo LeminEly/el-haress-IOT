@@ -32,6 +32,8 @@ class Account(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     phone_number: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     company_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Destinataire des notifications email (optionnel ; le telephone sert SMS/WhatsApp).
+    contact_email: Mapped[str | None] = mapped_column(String(255))
     role: Mapped[AccountRole] = mapped_column(
         Enum(AccountRole, native_enum=False, length=20), nullable=False
     )

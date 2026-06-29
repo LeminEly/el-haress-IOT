@@ -7,6 +7,7 @@ courante (verifie via le contexte de tenance, jamais via un parametre client).
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,8 +15,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..core.exceptions import ProblemException
 from ..sensors.sensors_models import Sensor
 from ..tenancy.tenancy import TenantContext
-from .alerting_models import AlertRule
+from .alerting_models import Alert, AlertRule, AlertStatus
 from .alerting_schemas import AlertRuleCreate, AlertRuleUpdate
+
+_MAX_ALERTS = 500
 
 
 class AlertingService:
@@ -85,3 +88,24 @@ class AlertingService:
         rule = await self._get_owned_rule(rule_id)
         await self._session.delete(rule)
         await self._session.commit()
+
+    # -- Alertes declenchees ------------------------------------------------
+
+    async def list_alerts(self, *, status: AlertStatus | None = None) -> list[Alert]:
+        query = select(Alert).where(Alert.account_id == self._account_id)
+        if status is not None:
+            query = query.where(Alert.status == status)
+        query = query.order_by(Alert.triggered_at.desc()).limit(_MAX_ALERTS)
+        return list(await self._session.scalars(query))
+
+    async def acknowledge_alert(self, alert_id: uuid.UUID) -> Alert:
+        alert = await self._session.scalar(
+            select(Alert).where(Alert.id == alert_id, Alert.account_id == self._account_id)
+        )
+        if alert is None:
+            raise ProblemException(404, "Alerte introuvable")
+        alert.status = AlertStatus.ACKNOWLEDGED
+        alert.acknowledged_at = datetime.now(UTC)
+        await self._session.commit()
+        await self._session.refresh(alert)
+        return alert

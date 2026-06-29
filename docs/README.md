@@ -20,6 +20,7 @@ Documentation de developpement et d'exploitation du depot `el-haress-app`.
 | [database-schema.md](database-schema.md)       | Schema TimescaleDB : tables, hypertable, retention, Raspberry Pi |
 | [security.md](security.md)                     | Modele de securite : auth JWT RS256, isolation, anti-abus       |
 | [api-reference.md](api-reference.md)           | Endpoints REST + WebSocket, contrat de reponse                  |
+| [alerting-rules.md](alerting-rules.md)         | Moteur d'alertes : regles, gate/cooldown, notifications         |
 
 ---
 

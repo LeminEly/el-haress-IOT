@@ -57,6 +57,13 @@ API REST + WebSocket d'El-Haress. Prefixe : `/api/v1`. OpenAPI interactif sur
 | PATCH   | `/alert-rules/{id}`    | modifier                   |
 | DELETE  | `/alert-rules/{id}`    | supprimer                  |
 
+## Alertes declenchees
+
+| Methode | Chemin                | Description                          |
+| ------- | --------------------- | ------------------------------------ |
+| GET     | `/alerts`             | historique (filtre `status`)         |
+| POST    | `/alerts/{id}/ack`    | acquitter une alerte                 |
+
 ## Temps reel
 
 | Type      | Chemin                     | Description                                  |
