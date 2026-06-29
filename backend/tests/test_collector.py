@@ -145,11 +145,14 @@ _SAMPLES = [
         gateway_ref="16145",
         name="Sensor 16145",
         unit="C",
+        kind="temperature",
         value=30.5,
         valid=True,
         hardware_id="28113fe50e0000a5",
     ),
-    Ste2Sample(gateway_ref="6686", name="Sensor 6686", unit=None, value=None, valid=False),
+    Ste2Sample(
+        gateway_ref="6686", name="Sensor 6686", unit=None, kind="unknown", value=None, valid=False
+    ),
 ]
 
 

@@ -26,6 +26,7 @@ from .sensors_schemas import (
     SensorRead,
     SensorUpdate,
 )
+from .ste2_parser import is_binary_kind
 
 _BUCKET_VIEW = {ReadingBucket.MIN: "readings_1min", ReadingBucket.HOUR: "readings_1hour"}
 _MAX_LIMIT = 5000
@@ -75,10 +76,21 @@ class SensorsService:
             sensor.is_active and sensor.last_seen_at is not None and sensor.last_seen_at >= cutoff
         )
 
+    @staticmethod
+    def _display_name(sensor: Sensor) -> str:
+        """Nom d'affichage : el-haress-NN-<label> (prefixe + index entreprise)."""
+        if sensor.device_index is None:
+            return sensor.label
+        return f"el-haress-{sensor.device_index:02d}-{sensor.label}"
+
     def to_read(self, sensor: Sensor, cutoff: datetime | None = None) -> SensorRead:
         cutoff = cutoff or self._offline_cutoff()
         return SensorRead.model_validate(sensor).model_copy(
-            update={"online": self._is_online(sensor, cutoff)}
+            update={
+                "online": self._is_online(sensor, cutoff),
+                "display_name": self._display_name(sensor),
+                "is_binary": is_binary_kind(sensor.kind),
+            }
         )
 
     async def list_sensors(self) -> list[Sensor]:

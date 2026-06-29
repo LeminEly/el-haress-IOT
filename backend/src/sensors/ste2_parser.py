@@ -13,11 +13,16 @@ from dataclasses import dataclass, replace
 from defusedxml.ElementTree import fromstring
 
 _INVALID_VALUE = -999.9
+# Unite STE2 -> type de capteur. Table extensible : ajouter un code suffit pour
+# prendre en charge un nouveau type, sans toucher au reste du collector.
 _UNIT_TO_KIND = {
     "C": "temperature",
     "F": "temperature",
     "%": "humidity",
+    "WLD": "flood",
 }
+# Types a etat binaire (detecte / normal) plutot qu'a valeur continue.
+_BINARY_KINDS = frozenset({"flood", "contact", "motion", "smoke"})
 
 
 @dataclass(frozen=True)
@@ -25,6 +30,7 @@ class Ste2Sample:
     gateway_ref: str
     name: str
     unit: str | None
+    kind: str
     value: float | None
     valid: bool
     hardware_id: str | None = None
@@ -34,6 +40,11 @@ def infer_kind(unit: str | None) -> str:
     if unit is None:
         return "unknown"
     return _UNIT_TO_KIND.get(unit.strip(), "unknown")
+
+
+def is_binary_kind(kind: str) -> bool:
+    """Un capteur binaire n'a pas de mesure continue : on en derive un etat 0/1."""
+    return kind in _BINARY_KINDS
 
 
 def _localname(tag: str) -> str:
@@ -55,6 +66,8 @@ def parse_values(xml_text: str) -> list[Ste2Sample]:
             continue
         unit = fields.get("Units") or None
         state = fields.get("State", "0")
+        alarm = _nested_text(entry, "status", "alarm")
+        kind = infer_kind(unit)
         try:
             raw_value: float | None = float(fields.get("Value", ""))
         except ValueError:
@@ -65,16 +78,36 @@ def parse_values(xml_text: str) -> list[Ste2Sample]:
             and state == "1"
             and unit is not None
         )
+        if not valid:
+            value: float | None = None
+        elif is_binary_kind(kind):
+            # Capteur binaire : on derive un etat 0/1. "Detecte" si l'appareil
+            # signale une alarme ou si la valeur brute est non nulle.
+            detected = alarm == "1" or (raw_value is not None and raw_value != 0.0)
+            value = 1.0 if detected else 0.0
+        else:
+            value = raw_value
         samples.append(
             Ste2Sample(
                 gateway_ref=gateway_ref,
                 name=fields.get("Name", ""),
                 unit=unit,
-                value=raw_value if valid else None,
+                kind=kind,
+                value=value,
                 valid=valid,
             )
         )
     return samples
+
+
+def _nested_text(entry, parent: str, child: str) -> str:
+    """Texte d'un sous-element (`<parent><child>...`), chaine vide si absent."""
+    for element in entry:
+        if _localname(element.tag) == parent:
+            for sub in element:
+                if _localname(sub.tag) == child:
+                    return (sub.text or "").strip()
+    return ""
 
 
 def parse_identities(xml_text: str) -> dict[str, str]:

@@ -15,13 +15,12 @@ from datetime import UTC, datetime
 from typing import Any
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from ..sensors.sensors_models import Gateway, Reading, Sensor
 from ..sensors.ste2_client import SampleSource
-from ..sensors.ste2_parser import infer_kind
 
 logger = structlog.get_logger(__name__)
 
@@ -81,6 +80,14 @@ class CollectorService:
                         select(Sensor).where(Sensor.gateway_id == gateway.id)
                     )
                 }
+                # Index sequentiel par entreprise (pour le nom el-haress-NN-...).
+                next_index = (
+                    await session.scalar(
+                        select(func.coalesce(func.max(Sensor.device_index), 0)).where(
+                            Sensor.account_id == gateway.account_id
+                        )
+                    )
+                ) + 1
                 for sample in samples:
                     sensor = existing.get(sample.gateway_ref)
                     if sensor is None:
@@ -90,15 +97,24 @@ class CollectorService:
                             gateway_ref=sample.gateway_ref,
                             hardware_id=sample.hardware_id,
                             label=sample.name or sample.gateway_ref,
-                            kind=infer_kind(sample.unit),
+                            kind=sample.kind,
                             unit=sample.unit,
+                            device_index=next_index,
                             is_active=True,
                         )
+                        next_index += 1
                         session.add(sensor)
                         await session.flush()
                         existing[sample.gateway_ref] = sensor
-                    elif sample.hardware_id and not sensor.hardware_id:
-                        sensor.hardware_id = sample.hardware_id
+                    else:
+                        if sample.hardware_id and not sensor.hardware_id:
+                            sensor.hardware_id = sample.hardware_id
+                        # Rafraichit unite/type des qu'ils sont connus : un capteur
+                        # decouvert hors-ligne se completera une fois branche.
+                        if sample.unit and sensor.unit != sample.unit:
+                            sensor.unit = sample.unit
+                        if sample.kind != "unknown" and sensor.kind != sample.kind:
+                            sensor.kind = sample.kind
 
                     if sample.valid and sensor.is_active:
                         session.add(

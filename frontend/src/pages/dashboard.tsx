@@ -12,6 +12,7 @@ import { StatusDot } from '@/components/ui/status-dot';
 import { useDashboardSummary, useReadings, useSensors } from '@/hooks/queries';
 import { useLiveReadings } from '@/hooks/use-live';
 import { formatValue } from '@/lib/format';
+import { formatSensorValue, isDetected, sensorName } from '@/lib/sensor-display';
 import { useSettings } from '@/stores/settings';
 import type { ReadingPoint, Sensor, SensorStatus } from '@/types/api';
 
@@ -34,7 +35,13 @@ function isOnline(entry: LiveEntry | undefined, sensor: Sensor, windowMs: number
 }
 
 function sensorStatus(entry: LiveEntry | undefined, sensor: Sensor): SensorStatus {
-  if (entry && sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
+  if (!entry) {
+    return 'normal';
+  }
+  if (sensor.is_binary) {
+    return isDetected(entry.value) ? 'critical' : 'normal';
+  }
+  if (sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
     return 'critical';
   }
   return 'normal';
@@ -157,9 +164,10 @@ export default function DashboardPage() {
               return (
                 <SensorCard
                   key={sensor.id}
-                  label={sensor.label}
+                  label={sensorName(sensor)}
                   value={entry?.value}
                   unit={sensor.unit}
+                  isBinary={sensor.is_binary}
                   recordedAt={entry?.recorded_at}
                   status={sensorStatus(entry, sensor)}
                   onClick={() => setDetailId(sensor.id)}
@@ -190,11 +198,10 @@ export default function DashboardPage() {
                         className="h-0.5 w-4 rounded-full"
                         style={{ backgroundColor: sensor.color || 'var(--color-fg)' }}
                       />
-                      <span className="text-fg">{sensor.label}</span>
+                      <span className="text-fg">{sensorName(sensor)}</span>
                       {entry && (
                         <span className="tabular-nums text-fg-muted">
-                          {formatValue(entry.value, locale)}
-                          {sensor.unit ? ` ${sensor.unit}` : ''}
+                          {formatSensorValue(sensor, entry.value, locale, t)}
                         </span>
                       )}
                     </label>
@@ -219,14 +226,12 @@ export default function DashboardPage() {
       <Dialog open={detailId !== null} onOpenChange={(open) => !open && setDetailId(null)}>
         {detailSensor && (
           <DialogContent>
-            <DialogTitle>{detailSensor.label}</DialogTitle>
+            <DialogTitle>{sensorName(detailSensor)}</DialogTitle>
             <div className="mt-1 flex flex-wrap gap-x-6 gap-y-1 text-sm text-fg-muted">
               <span>
                 {t('dashboard.current')} :{' '}
                 <span className="font-medium text-fg">
-                  {live[detailSensor.id]
-                    ? `${formatValue(live[detailSensor.id].value, locale)}${detailSensor.unit ? ` ${detailSensor.unit}` : ''}`
-                    : '--'}
+                  {formatSensorValue(detailSensor, live[detailSensor.id]?.value, locale, t)}
                 </span>
               </span>
               <span>

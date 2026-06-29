@@ -34,6 +34,10 @@
     "threshold": "Seuil",
     "noThreshold": "Aucun seuil"
   },
+  "sensor": {
+    "detected": "Detecte",
+    "normal": "Normal"
+  },
   "history": {
     "range": {
       "1h": "1 h",

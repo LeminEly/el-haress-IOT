@@ -51,6 +51,9 @@ export interface Sensor {
   unit: string | null;
   is_active: boolean;
   last_seen_at: string | null;
+  device_index: number | null;
+  display_name: string;
+  is_binary: boolean;
   online: boolean;
   critical_threshold: number | null;
   color: string | null;

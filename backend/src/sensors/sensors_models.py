@@ -57,6 +57,8 @@ class Sensor(UUIDPrimaryKeyMixin, TimestampMixin, TenantMixin, Base):
     label: Mapped[str] = mapped_column(String(255), nullable=False)
     kind: Mapped[str] = mapped_column(String(64), nullable=False)
     unit: Mapped[str | None] = mapped_column(String(16))
+    # Index sequentiel par entreprise, support du nom d'affichage el-haress-NN-...
+    device_index: Mapped[int | None] = mapped_column(Integer)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Configuration par capteur : seuil critique (affichage/statut) et couleur de courbe.

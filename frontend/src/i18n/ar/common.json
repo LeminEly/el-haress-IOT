@@ -34,6 +34,10 @@
     "threshold": "العتبة",
     "noThreshold": "لا توجد عتبة"
   },
+  "sensor": {
+    "detected": "تم الكشف",
+    "normal": "عادي"
+  },
   "history": {
     "range": {
       "1h": "ساعة",

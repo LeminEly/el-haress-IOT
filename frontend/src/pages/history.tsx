@@ -14,6 +14,7 @@ import { Select, SelectItem } from '@/components/ui/select';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import { useReadings, useSensors } from '@/hooks/queries';
 import { formatValue } from '@/lib/format';
+import { formatSensorValue, sensorName } from '@/lib/sensor-display';
 import { categorizeSensor, CATEGORIES } from '@/lib/sensor-categories';
 import { useSettings } from '@/stores/settings';
 
@@ -224,7 +225,7 @@ export default function HistoryPage() {
                     className="h-0.5 w-4 rounded-full"
                     style={{ backgroundColor: sensor.color || 'var(--color-fg)' }}
                   />
-                  <span className="text-fg">{sensor.label}</span>
+                  <span className="text-fg">{sensorName(sensor)}</span>
                   {sensor.unit && <span className="text-fg-subtle text-xs">({sensor.unit})</span>}
                 </label>
               ))}
@@ -255,7 +256,9 @@ export default function HistoryPage() {
                           className="h-2 w-2 shrink-0 rounded-full"
                           style={{ backgroundColor: sensor.color || 'var(--color-fg)' }}
                         />
-                        <span className="text-xs font-medium text-fg-muted">{sensor.label}</span>
+                        <span className="text-xs font-medium text-fg-muted">
+                          {sensorName(sensor)}
+                        </span>
                       </div>
                       <div className="mt-1 grid grid-cols-3 gap-2 text-center text-xs">
                         <div>
@@ -339,10 +342,13 @@ export default function HistoryPage() {
                             <TD className="text-xs text-fg-muted" dir="ltr">
                               {format(new Date(point.recorded_at), 'Pp')}
                             </TD>
-                            <TD className="text-xs">{sensor?.label ?? point.sensor_id}</TD>
+                            <TD className="text-xs">
+                              {sensor ? sensorName(sensor) : point.sensor_id}
+                            </TD>
                             <TD className="text-end text-xs tabular-nums">
-                              {formatValue(point.value, locale)}
-                              {sensor?.unit ? ` ${sensor.unit}` : ''}
+                              {sensor
+                                ? formatSensorValue(sensor, point.value, locale, t)
+                                : formatValue(point.value, locale)}
                             </TD>
                           </TR>
                         );

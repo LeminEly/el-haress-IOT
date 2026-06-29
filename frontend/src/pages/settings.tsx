@@ -20,6 +20,7 @@ import {
   useSensors,
   useUpdateSensor,
 } from '@/hooks/queries';
+import { sensorName } from '@/lib/sensor-display';
 import type { AlertChannel, AlertCondition, AlertSeverity, Sensor } from '@/types/api';
 
 const CHANNELS: AlertChannel[] = ['whatsapp', 'sms', 'email'];
@@ -123,6 +124,9 @@ function SensorRow({ sensor }: { sensor: Sensor }) {
     <TR>
       <TD>
         <Input value={label} onChange={(e) => setLabel(e.target.value)} className="h-9" />
+        <span className="mt-1 block text-xs text-fg-subtle" dir="ltr">
+          {sensorName(sensor)}
+        </span>
       </TD>
       <TD className="text-fg-muted">{sensor.kind}</TD>
       <TD>{sensor.is_active ? t('settings.active') : t('settings.inactive')}</TD>
@@ -305,7 +309,7 @@ function RulesSection() {
               <SelectItem value="all">{t('settings.allSensors')}</SelectItem>
               {(sensors.data ?? []).map((sensor) => (
                 <SelectItem key={sensor.id} value={sensor.id}>
-                  {sensor.label}
+                  {sensorName(sensor)}
                 </SelectItem>
               ))}
             </Select>

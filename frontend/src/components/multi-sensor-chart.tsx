@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { sensorName } from '@/lib/sensor-display';
 import type { ReadingPoint, Sensor } from '@/types/api';
 
 const SERIES_FALLBACK = ['var(--color-fg)', '#a1a1aa', '#52525b', '#71717a', '#d4d4d8'];
@@ -84,7 +85,7 @@ export function MultiSensorChart({
             key={sensor.id}
             type="monotone"
             dataKey={sensor.id}
-            name={sensor.label}
+            name={sensorName(sensor)}
             stroke={sensor.color || SERIES_FALLBACK[index % SERIES_FALLBACK.length]}
             strokeWidth={2}
             strokeDasharray={SERIES_DASH[index % SERIES_DASH.length]}
@@ -101,7 +102,7 @@ export function MultiSensorChart({
             strokeDasharray="4 4"
             strokeWidth={1}
             label={{
-              value: `${sensor.label} seuil: ${value}${sensor.unit ? ` ${sensor.unit}` : ''}`,
+              value: `${sensorName(sensor)} seuil: ${value}${sensor.unit ? ` ${sensor.unit}` : ''}`,
               position: 'right',
               fill: 'var(--color-critical)',
               fontSize: 10,
