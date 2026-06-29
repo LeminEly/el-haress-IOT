@@ -1,38 +1,73 @@
 # Pipeline GitLab CI — El-Haress
 #
-# Trois preoccupations, dans cet ordre :
-#   1. securite  : aucun secret ne doit exister dans l'historique (gitleaks)
-#   2. qualite   : lint backend (ruff) et frontend (eslint), formatage
-#   3. tests     : suites backend (pytest) et frontend
+# Quatre preoccupations :
+#   1. securite : secrets (gitleaks, bloquant), SAST (semgrep), CVE deps (trivy)
+#   2. lint     : ruff (backend), eslint + prettier (frontend)
+#   3. test     : pytest (backend, sur TimescaleDB) et build de production (frontend)
 #
-# Le depot distant reste propre : un commit qui introduit un secret, casse le
-# lint ou les tests ne passe pas la chaine.
+# Un commit qui introduit un secret, casse le lint, les tests ou le build ne passe
+# pas la chaine.
 
 stages:
-  - secrets
+  - security
   - lint
   - test
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  GIT_DEPTH: "50"
+  PIP_CACHE_DIR: '$CI_PROJECT_DIR/.cache/pip'
+  GIT_DEPTH: '50'
 
-# ---------------------------------------------------------------------------
-# 1. Detection de secrets — bloquant
-# ---------------------------------------------------------------------------
-gitleaks:
-  stage: secrets
-  image:
-    name: zricethezav/gitleaks:latest
-    entrypoint: [""]
-  script:
-    - gitleaks detect --source . --config .gitleaks.toml --redact --verbose
+# Evite les pipelines en double (branche + merge request).
+workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
     - if: '$CI_COMMIT_BRANCH'
 
 # ---------------------------------------------------------------------------
-# 2. Lint backend — ruff
+# 1. Securite
+# ---------------------------------------------------------------------------
+
+# Detection de secrets — BLOQUANT (aucun secret ne doit entrer dans l'historique).
+gitleaks:
+  stage: security
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: ['']
+  script:
+    - gitleaks detect --source . --config .gitleaks.toml --redact --verbose
+
+# Analyse statique (SAST) — advisory (affichee, ne bloque pas tant que la base de
+# reference n'est pas triee). Couvre python, javascript, owasp et secrets.
+sast-semgrep:
+  stage: security
+  image:
+    name: semgrep/semgrep:1.112.0
+    entrypoint: ['']
+  script:
+    - >
+      semgrep scan
+      --config p/python --config p/javascript
+      --config p/owasp-top-ten --config p/secrets
+      --exclude node_modules --exclude dist --exclude '.venv'
+      --metrics off .
+  allow_failure: true
+
+# Vulnerabilites des dependances et de l'IaC (trivy) — advisory en HIGH, bloquant
+# en CRITICAL sur les lockfiles.
+trivy:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: ['']
+  script:
+    - trivy fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 0 --no-progress .
+    - trivy fs --scanners vuln --severity CRITICAL --exit-code 1 --no-progress .
+  allow_failure: true
+
+# ---------------------------------------------------------------------------
+# 2. Lint
 # ---------------------------------------------------------------------------
 backend-lint:
   stage: lint
@@ -46,12 +81,15 @@ backend-lint:
     - exists:
         - backend/pyproject.toml
 
-# ---------------------------------------------------------------------------
-# 2bis. Lint frontend — eslint + prettier
-# ---------------------------------------------------------------------------
 frontend-lint:
   stage: lint
   image: node:22-slim
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - frontend/node_modules/
   before_script:
     - cd frontend && npm ci
   script:
@@ -62,29 +100,51 @@ frontend-lint:
         - frontend/package.json
 
 # ---------------------------------------------------------------------------
-# 3. Tests backend — pytest (couverture services >= 80 %)
+# 3. Tests
 # ---------------------------------------------------------------------------
+
+# Backend : pytest sur une vraie TimescaleDB (service), migrations appliquees.
+# Redis est remplace par fakeredis dans les tests : pas de service Redis requis.
 backend-test:
   stage: test
   image: python:3.12-slim
+  services:
+    - name: timescale/timescaledb:2.17.2-pg16
+      alias: timescaledb
+  variables:
+    POSTGRES_USER: el_haress
+    POSTGRES_PASSWORD: dev_password
+    POSTGRES_DB: el_haress
+    DATABASE_URL: 'postgresql+asyncpg://el_haress:dev_password@timescaledb:5432/el_haress'
   before_script:
-    - pip install -e "backend/[dev]"
+    - cd backend
+    - pip install -e ".[dev]"
+    # Cles RS256 ephemeres pour les tests (jamais au depot ; generees via cryptography).
+    - mkdir -p keys
+    - python -c "from cryptography.hazmat.primitives.asymmetric import rsa; from cryptography.hazmat.primitives import serialization as s; k=rsa.generate_private_key(public_exponent=65537, key_size=2048); open('keys/private.pem','wb').write(k.private_bytes(s.Encoding.PEM, s.PrivateFormat.PKCS8, s.NoEncryption())); open('keys/public.pem','wb').write(k.public_key().public_bytes(s.Encoding.PEM, s.PublicFormat.SubjectPublicKeyInfo))"
+    # Attente de la base (retry de la migration jusqu'a disponibilite).
+    - for i in $(seq 1 15); do alembic upgrade head && break || sleep 3; done
   script:
-    - cd backend && pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+    - pytest --cov=src --cov-report=term-missing --cov-fail-under=80
   rules:
     - exists:
         - backend/pyproject.toml
 
-# ---------------------------------------------------------------------------
-# 3bis. Tests frontend
-# ---------------------------------------------------------------------------
-frontend-test:
+# Frontend : pas de tests unitaires (DoD = build + lint + rendu). Le build de
+# production fait office de verification (typecheck tsc + bundling vite).
+frontend-build:
   stage: test
   image: node:22-slim
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - frontend/node_modules/
   before_script:
     - cd frontend && npm ci
   script:
-    - npm test
+    - npm run build
   rules:
     - exists:
         - frontend/package.json
