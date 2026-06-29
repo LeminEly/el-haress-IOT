@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     max_login_attempts: int = 5
     account_lock_minutes: int = 15
     login_rate_limit_per_minute: int = 10
+    jwt_issuer: str = "el-haress"
+    default_phone_region: str = "MR"
+    refresh_cookie_name: str = "el_haress_refresh"
+    cookie_secure: bool = False  # force a True via l'environnement en production
 
     # -- CORS ---------------------------------------------------------------
     cors_origins: str = "http://localhost:5173"

@@ -15,10 +15,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.health_routes import router as health_router
+from .auth.accounts_routes import router as accounts_router
+from .auth.auth_routes import router as auth_router
 from .config import Settings, get_settings
 from .core.exceptions import install_exception_handlers
 from .core.logging import configure_logging, get_logger
-from .core.middleware import install_request_context
+from .core.middleware import install_request_context, install_security_headers
 
 _API_PREFIX = "/api/v1"
 
@@ -55,9 +57,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["*"],
     )
     install_request_context(app)
+    install_security_headers(app, is_production=settings.is_production)
     install_exception_handlers(app, is_production=settings.is_production)
 
     app.include_router(health_router, prefix=_API_PREFIX)
+    app.include_router(auth_router, prefix=_API_PREFIX)
+    app.include_router(accounts_router, prefix=_API_PREFIX)
 
     return app
 

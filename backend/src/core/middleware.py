@@ -32,3 +32,31 @@ def install_request_context(app: FastAPI) -> None:
             structlog.contextvars.clear_contextvars()
         response.headers[_REQUEST_ID_HEADER] = request_id
         return response
+
+
+# En-tetes de securite appliques a chaque reponse. La CSP est restrictive : l'API
+# ne sert pas de HTML ; le frontend (servi par Nginx) porte sa propre politique.
+_SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+    "Cross-Origin-Opener-Policy": "same-origin",
+}
+
+
+def install_security_headers(app: FastAPI, *, is_production: bool) -> None:
+    """Ajoute les en-tetes de securite. HSTS uniquement en production (HTTPS)."""
+
+    headers = dict(_SECURITY_HEADERS)
+    if is_production:
+        headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+    @app.middleware("http")
+    async def _security_headers(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        response = await call_next(request)
+        for name, value in headers.items():
+            response.headers.setdefault(name, value)
+        return response
