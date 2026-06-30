@@ -114,7 +114,11 @@ export default function DashboardPage() {
   const onlineSensors = sensorList.filter((sensor) =>
     isOnline(live[sensor.id], sensor, offlineAfterMs),
   );
-  const visibleSensors = onlineSensors.filter((sensor) => !hidden.has(sensor.id));
+  // Le graphe lineaire ne represente que les capteurs continus : un capteur
+  // binaire (0/1) ecraserait l'axe Y et serait illisible. Il reste visible via
+  // sa carte (Detecte / Normal).
+  const chartSensors = onlineSensors.filter((sensor) => !sensor.is_binary);
+  const visibleSensors = chartSensors.filter((sensor) => !hidden.has(sensor.id));
   const detailSensor = sensorList.find((sensor) => sensor.id === detailId);
   const detailPoints = detailSensor
     ? points.filter((point) => point.sensor_id === detailSensor.id)
@@ -176,50 +180,52 @@ export default function DashboardPage() {
             })}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('dashboard.evolution')}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {/* Legende : capteurs connectes, chacun a son seuil ; cocher pour afficher. */}
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {onlineSensors.map((sensor) => {
-                  const entry = live[sensor.id];
-                  return (
-                    <label
-                      key={sensor.id}
-                      className="flex cursor-pointer items-center gap-2 text-sm"
-                    >
-                      <Checkbox
-                        checked={!hidden.has(sensor.id)}
-                        onCheckedChange={() => toggle(sensor.id)}
-                      />
-                      <span
-                        className="h-0.5 w-4 rounded-full"
-                        style={{ backgroundColor: sensor.color || 'var(--color-fg)' }}
-                      />
-                      <span className="text-fg">{sensorName(sensor)}</span>
-                      {entry && (
-                        <span className="tabular-nums text-fg-muted">
-                          {formatSensorValue(sensor, entry.value, locale, t)}
-                        </span>
-                      )}
-                    </label>
-                  );
-                })}
-              </div>
+          {chartSensors.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('dashboard.evolution')}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                {/* Legende : capteurs continus connectes ; cocher pour afficher la courbe. */}
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
+                  {chartSensors.map((sensor) => {
+                    const entry = live[sensor.id];
+                    return (
+                      <label
+                        key={sensor.id}
+                        className="flex cursor-pointer items-center gap-2 text-sm"
+                      >
+                        <Checkbox
+                          checked={!hidden.has(sensor.id)}
+                          onCheckedChange={() => toggle(sensor.id)}
+                        />
+                        <span
+                          className="h-0.5 w-4 rounded-full"
+                          style={{ backgroundColor: sensor.color || 'var(--color-fg)' }}
+                        />
+                        <span className="text-fg">{sensorName(sensor)}</span>
+                        {entry && (
+                          <span className="tabular-nums text-fg-muted">
+                            {formatSensorValue(sensor, entry.value, locale, t)}
+                          </span>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
 
-              {points.length > 0 && visibleSensors.length > 0 ? (
-                <MultiSensorChart
-                  sensors={visibleSensors}
-                  readings={points}
-                  thresholds={thresholds}
-                />
-              ) : (
-                <EmptyState message={t('dashboard.noData')} />
-              )}
-            </CardContent>
-          </Card>
+                {points.length > 0 && visibleSensors.length > 0 ? (
+                  <MultiSensorChart
+                    sensors={visibleSensors}
+                    readings={points}
+                    thresholds={thresholds}
+                  />
+                ) : (
+                  <EmptyState message={t('dashboard.noData')} />
+                )}
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 

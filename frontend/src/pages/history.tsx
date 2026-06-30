@@ -92,6 +92,9 @@ export default function HistoryPage() {
 
   const visibleIds = selected.length > 0 ? selected : selectedCategorySensors.map((s) => s.id);
   const visibleSensors = sensorList.filter((s) => visibleIds.includes(s.id));
+  // Le graphe lineaire n'affiche que les capteurs continus ; les binaires (0/1)
+  // restent visibles dans le tableau (Detecte / Normal).
+  const chartSensors = visibleSensors.filter((s) => !s.is_binary);
 
   const readings = useReadings({ start, end, limit: 5000 }, { refetchInterval: 10_000 });
 
@@ -239,12 +242,14 @@ export default function HistoryPage() {
             <LoadingState />
           ) : filteredReadings.length > 0 ? (
             <>
-              <MultiSensorChart
-                sensors={visibleSensors}
-                readings={filteredReadings}
-                thresholds={thresholds}
-                height={360}
-              />
+              {chartSensors.length > 0 && (
+                <MultiSensorChart
+                  sensors={chartSensors}
+                  readings={filteredReadings}
+                  thresholds={thresholds}
+                  height={360}
+                />
+              )}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleSensors.map((sensor) => {
                   const s = statsBySensor[sensor.id];
