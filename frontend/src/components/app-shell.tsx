@@ -1,4 +1,4 @@
-import { Bell, GaugeCircle, History, LogOut, Settings, Users } from 'lucide-react';
+import { Bell, GaugeCircle, History, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
@@ -17,11 +17,18 @@ interface NavItem {
   end?: boolean;
 }
 
-const BASE_NAV: NavItem[] = [
-  { to: '/', key: 'nav.dashboard', icon: GaugeCircle, end: true },
+// Supervision : reservee aux entreprises (elles ont des capteurs/donnees).
+const COMPANY_NAV: NavItem[] = [
+  { to: '/dashboard', key: 'nav.dashboard', icon: GaugeCircle },
   { to: '/history', key: 'nav.history', icon: History },
   { to: '/alerts', key: 'nav.alerts', icon: Bell },
   { to: '/settings', key: 'nav.settings', icon: Settings },
+];
+
+// Exploitation : l'admin pilote la plateforme (pas de capteurs propres).
+const ADMIN_NAV: NavItem[] = [
+  { to: '/overview', key: 'nav.overview', icon: LayoutDashboard },
+  { to: '/accounts', key: 'nav.accounts', icon: Users },
 ];
 
 function NavItems({ items }: { items: NavItem[] }) {
@@ -54,10 +61,7 @@ export function AppShell() {
   const logout = useLogout();
   const navigate = useNavigate();
 
-  const items =
-    account?.role === 'SUPER_ADMIN'
-      ? [...BASE_NAV, { to: '/accounts', key: 'nav.accounts', icon: Users }]
-      : BASE_NAV;
+  const items = account?.role === 'SUPER_ADMIN' ? ADMIN_NAV : COMPANY_NAV;
 
   const handleLogout = () => logout.mutate(undefined, { onSettled: () => navigate('/login') });
 

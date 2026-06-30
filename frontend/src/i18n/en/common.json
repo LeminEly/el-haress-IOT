@@ -16,8 +16,26 @@
     "history": "History",
     "alerts": "Alerts",
     "settings": "Settings",
+    "overview": "Overview",
     "accounts": "Accounts",
     "logout": "Log out"
+  },
+  "overview": {
+    "title": "Platform overview",
+    "companies": "Companies",
+    "companiesLower": "companies",
+    "activeLower": "active",
+    "sensorsOnline": "Sensors online",
+    "ofTotal": "of",
+    "activeAlerts": "Active alerts",
+    "suspended": "Suspended",
+    "company": "Company",
+    "status": "Status",
+    "sensors": "Sensors",
+    "alerts": "Alerts",
+    "lastActivity": "Last activity",
+    "noActivity": "None",
+    "empty": "No company registered."
   },
   "auth": {
     "subtitle": "Sign in to your monitoring workspace",

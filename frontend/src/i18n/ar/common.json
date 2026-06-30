@@ -16,8 +16,26 @@
     "history": "السجل",
     "alerts": "التنبيهات",
     "settings": "الإعدادات",
+    "overview": "نظرة عامة",
     "accounts": "الحسابات",
     "logout": "تسجيل الخروج"
+  },
+  "overview": {
+    "title": "نظرة عامة على المنصة",
+    "companies": "الشركات",
+    "companiesLower": "شركات",
+    "activeLower": "نشطة",
+    "sensorsOnline": "المستشعرات المتصلة",
+    "ofTotal": "من",
+    "activeAlerts": "تنبيهات نشطة",
+    "suspended": "موقوفة",
+    "company": "الشركة",
+    "status": "الحالة",
+    "sensors": "المستشعرات",
+    "alerts": "التنبيهات",
+    "lastActivity": "آخر نشاط",
+    "noActivity": "لا يوجد",
+    "empty": "لا توجد شركة مسجلة."
   },
   "auth": {
     "subtitle": "تسجيل الدخول إلى مساحة المراقبة",

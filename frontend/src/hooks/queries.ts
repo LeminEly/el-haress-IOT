@@ -9,9 +9,20 @@ import type {
   DashboardSummary,
   Gateway,
   LatestReading,
+  PlatformOverview,
   ReadingPoint,
   Sensor,
 } from '@/types/api';
+
+// -- Administration plateforme (SUPER_ADMIN) ----------------------------------
+
+export function useAdminOverview() {
+  return useQuery({
+    queryKey: ['admin', 'overview'],
+    queryFn: () => getData<PlatformOverview>('/admin/overview'),
+    refetchInterval: 15_000,
+  });
+}
 
 // -- Capteurs et passerelles --------------------------------------------------
 

@@ -16,8 +16,26 @@
     "history": "Historique",
     "alerts": "Alertes",
     "settings": "Parametres",
+    "overview": "Vue d'ensemble",
     "accounts": "Comptes",
     "logout": "Deconnexion"
+  },
+  "overview": {
+    "title": "Vue d'ensemble",
+    "companies": "Entreprises",
+    "companiesLower": "entreprises",
+    "activeLower": "actives",
+    "sensorsOnline": "Capteurs en ligne",
+    "ofTotal": "sur",
+    "activeAlerts": "Alertes actives",
+    "suspended": "Suspendues",
+    "company": "Entreprise",
+    "status": "Statut",
+    "sensors": "Capteurs",
+    "alerts": "Alertes",
+    "lastActivity": "Derniere activite",
+    "noActivity": "Aucune",
+    "empty": "Aucune entreprise enregistree."
   },
   "auth": {
     "subtitle": "Connexion a votre espace de supervision",

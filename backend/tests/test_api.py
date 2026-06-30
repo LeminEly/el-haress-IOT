@@ -379,3 +379,39 @@ async def test_pubsub_isolated_per_account() -> None:
 
 def _seed_via(client: TestClient, phone: str, gateway_ref: str) -> dict[str, uuid.UUID]:
     return _run(_seed_company(phone, gateway_ref))
+
+
+async def _seed_superadmin(phone: str) -> None:
+    engine = _engine()
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with factory() as session:
+            session.add(
+                Account(
+                    phone_number=phone,
+                    password_hash=hash_password(_PASSWORD, rounds=get_settings().bcrypt_rounds),
+                    company_name="Operateur",
+                    role=AccountRole.SUPER_ADMIN,
+                    status=AccountStatus.ACTIVE,
+                )
+            )
+            await session.commit()
+    finally:
+        await engine.dispose()
+
+
+def test_admin_overview_super_admin_only(client: TestClient) -> None:
+    # Vue globale plateforme : reservee au SUPER_ADMIN (controle RBAC), agrege
+    # toutes les entreprises. Une entreprise ne doit jamais y acceder.
+    _seed_via(client, "+22243000030", "16145")  # entreprise C : 1 capteur + 1 mesure
+    _run(_seed_superadmin("+22243000031"))
+
+    company_token = _login(client, "+22243000030")
+    forbidden = client.get("/api/v1/admin/overview", headers=_auth(company_token))
+    assert forbidden.status_code == 403
+
+    admin_token = _login(client, "+22243000031")
+    data = client.get("/api/v1/admin/overview", headers=_auth(admin_token)).json()["data"]
+    assert data["companies_total"] >= 1
+    assert data["sensors_total"] >= 1
+    assert "C" in {c["company_name"] for c in data["companies"]}

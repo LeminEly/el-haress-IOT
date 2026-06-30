@@ -82,6 +82,28 @@ export interface DashboardSummary {
   latest: LatestReading[];
 }
 
+export interface CompanyHealth {
+  account_id: string;
+  company_name: string;
+  phone_number: string;
+  status: AccountStatus;
+  language: AccountLanguage;
+  sensors_total: number;
+  sensors_online: number;
+  active_alerts: number;
+  last_activity_at: string | null;
+}
+
+export interface PlatformOverview {
+  companies_total: number;
+  companies_active: number;
+  companies_suspended: number;
+  sensors_total: number;
+  sensors_online: number;
+  active_alerts: number;
+  companies: CompanyHealth[];
+}
+
 export interface AlertRule {
   id: string;
   name: string;
