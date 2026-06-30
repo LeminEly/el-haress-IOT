@@ -33,6 +33,11 @@ class Ste2Sample:
     kind: str
     value: float | None
     valid: bool
+    # Codes d'etat appareil (status/state, status/alarm). Pour un capteur binaire,
+    # l'etat declenche sort la valeur de la plage (sentinelle -999.9) : on s'appuie
+    # alors sur status_state (1=normal, 2=alarme) plutot que sur la valeur continue.
+    status_state: str = "1"
+    alarm: str = "0"
     hardware_id: str | None = None
 
 
@@ -67,6 +72,7 @@ def parse_values(xml_text: str) -> list[Ste2Sample]:
         unit = fields.get("Units") or None
         state = fields.get("State", "0")
         alarm = _nested_text(entry, "status", "alarm")
+        status_state = _nested_text(entry, "status", "state") or state
         kind = infer_kind(unit)
         try:
             raw_value: float | None = float(fields.get("Value", ""))
@@ -95,6 +101,8 @@ def parse_values(xml_text: str) -> list[Ste2Sample]:
                 kind=kind,
                 value=value,
                 valid=valid,
+                status_state=status_state,
+                alarm=alarm,
             )
         )
     return samples

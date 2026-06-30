@@ -186,6 +186,56 @@ async def test_cycle_provisions_sensors_and_inserts_readings(
         assert gateway is not None and gateway.last_polled_at is not None
 
 
+async def test_binary_sensor_triggered_state_stays_visible(
+    session_factory: async_sessionmaker,
+) -> None:
+    # Un detecteur binaire (flood) ne doit jamais disparaitre. A l'etat normal il
+    # lit une valeur (0) ; a l'etat declenche l'appareil sort la valeur de la plage
+    # (sentinelle -999.9, status_state=2). On enregistre alors l'etat 1 (Detecte),
+    # au lieu de le traiter comme muet et de le masquer.
+    await _seed_gateway(session_factory)
+    normal = _FakeClient(
+        [
+            Ste2Sample(
+                gateway_ref="12571",
+                name="Flood",
+                unit="WLD",
+                kind="flood",
+                value=0.0,
+                valid=True,
+                status_state="1",
+            )
+        ]
+    )
+    await CollectorService(session_factory, normal).run_cycle()
+
+    triggered = _FakeClient(
+        [
+            Ste2Sample(
+                gateway_ref="12571",
+                name="Flood",
+                unit=None,
+                kind="unknown",
+                value=None,
+                valid=False,
+                status_state="2",
+            )
+        ]
+    )
+    result = (await CollectorService(session_factory, triggered).run_cycle())[0]
+
+    assert result.readings_inserted == 1  # enregistre malgre la sentinelle
+    assert result.mute == 0
+
+    async with session_factory() as session:
+        flood = (await session.scalars(select(Sensor).where(Sensor.gateway_ref == "12571"))).one()
+        assert flood.kind == "flood"
+        assert flood.last_seen_at is not None  # reste en ligne
+        readings = list(await session.scalars(select(Reading)))
+        assert len(readings) == 2
+        assert max(readings, key=lambda r: r.recorded_at).value == 1.0  # Detecte
+
+
 async def test_cycle_reuses_existing_sensor(session_factory: async_sessionmaker) -> None:
     _, gateway_id = await _seed_gateway(session_factory)
     async with session_factory() as session:
