@@ -3,7 +3,7 @@ import { Suspense, lazy } from 'react';
 import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import { AppShell } from '@/components/app-shell';
-import { ProtectedRoute } from '@/components/protected-route';
+import { AdminRoute, ProtectedRoute } from '@/components/protected-route';
 import { LoadingState } from '@/components/states';
 
 const LoginPage = lazy(() => import('@/pages/login'));
@@ -29,7 +29,11 @@ const router = createBrowserRouter([
           { path: 'history', element: lazyPage(<HistoryPage />) },
           { path: 'alerts', element: lazyPage(<AlertsPage />) },
           { path: 'settings', element: lazyPage(<SettingsPage />) },
-          { path: 'accounts', element: lazyPage(<AccountsPage />) },
+          {
+            path: 'accounts',
+            element: <AdminRoute />,
+            children: [{ index: true, element: lazyPage(<AccountsPage />) }],
+          },
         ],
       },
     ],
