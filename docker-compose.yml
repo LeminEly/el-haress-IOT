@@ -1,9 +1,12 @@
 # Stack de developpement local El-Haress.
 # Isolee (projet "el-haress", conteneurs et volumes dedies). Les ports hote sont
-# surchargeable pour cohabiter avec d'autres stacks sur la machine.
+# surchargeables pour cohabiter avec d'autres stacks sur la machine.
 #
-#   docker compose up -d timescaledb     base seule (suffit pour la phase 1)
-#   docker compose up -d                 base + redis
+#   docker compose up -d                 tout : base + redis + backend + collector
+#   docker compose up -d timescaledb redis   dependances seules (backend en local)
+#
+# Le backend applique les migrations au demarrage et sert l'API sur :8000.
+# Le frontend reste lance en local (`npm run dev`) et proxifie /api vers :8000.
 name: el-haress
 
 services:
@@ -38,6 +41,64 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+    restart: unless-stopped
+
+  # API FastAPI. Applique les migrations au demarrage (RUN_MIGRATIONS=1), puis
+  # sert sur :8000. Le code est monte en volume pour le rechargement a chaud.
+  backend:
+    build: ./backend
+    container_name: el-haress-backend
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - path: .env # secrets (Twilio, ...) ; optionnel : absent = valeurs par defaut
+        required: false
+    environment:
+      # Dans le reseau compose, la base et redis se joignent par nom de service.
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-el_haress}:${POSTGRES_PASSWORD:-dev_password}@timescaledb:5432/${POSTGRES_DB:-el_haress}
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+      CORS_ORIGINS: http://localhost:5173
+      RUN_MIGRATIONS: '1'
+    ports:
+      - '${BACKEND_HOST_PORT:-8000}:8000'
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/alembic:/app/alembic
+      - ./backend/keys:/app/keys
+    command:
+      ['uvicorn', 'src.main:app', '--host', '0.0.0.0', '--port', '8000', '--reload']
+    healthcheck:
+      test:
+        ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+
+  # Collector : meme image, polling des passerelles STE2 en arriere-plan.
+  # Il doit joindre le STE2 sur le LAN (route sortante NAT du bridge docker). Si
+  # l'appareil est injoignable depuis le conteneur, passer ce service en
+  # `network_mode: host` (et pointer DATABASE_URL/REDIS_HOST sur localhost).
+  collector:
+    build: ./backend
+    container_name: el-haress-collector
+    depends_on:
+      backend:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-el_haress}:${POSTGRES_PASSWORD:-dev_password}@timescaledb:5432/${POSTGRES_DB:-el_haress}
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/keys:/app/keys
+    command: ['python', '-u', '-m', 'src.collector']
     restart: unless-stopped
 
 volumes:

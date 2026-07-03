@@ -119,69 +119,50 @@ docker-compose.yml   stack locale (TimescaleDB + Redis)
 
 ## Lancer le projet en local
 
-Quatre composants tournent ensemble : **base + Redis** (Docker), **API**,
-**collector**, **frontend**. Ouvre un terminal par service.
+Le **backend est containerise** : `docker compose` demarre la base, Redis, l'API
+et le collector en une commande. Seul le **frontend** tourne en local (Vite, pour
+le rechargement a chaud). Deux choses a lancer, pas quatre.
 
 ### 1. Cloner et configurer l'environnement
 
 ```bash
 git clone https://gitlab.awlyg.tech/iot-el-haress/el-haress-app.git
 cd el-haress-app
-cp .env.example .env
+cp .env.example .env        # optionnel : sans .env, des valeurs par defaut s'appliquent
 ```
 
-Edite `.env` si besoin. Pour coller a la stack Docker fournie, mets Redis sur le
-port expose par Compose :
+Le `.env` sert aux secrets (Twilio, SMTP). Les parametres reseau (base, Redis)
+sont fournis par Compose : rien a ajuster.
 
-```env
-REDIS_PORT=6380
-```
-
-### 2. Demarrer la base de donnees et Redis
+### 2. Backend — base, Redis, API, collector (Docker)
 
 ```bash
 docker compose up -d
 ```
 
-TimescaleDB ecoute sur `localhost:5432`, Redis sur `localhost:6380`.
+Cette commande demarre quatre conteneurs :
 
-### 3. Backend — API
+| Conteneur | Role |
+| --------- | ---- |
+| `el-haress-timescaledb` | base TimescaleDB (`localhost:5432`) |
+| `el-haress-redis`       | Redis (`localhost:6380`) |
+| `el-haress-backend`     | API FastAPI (`localhost:8000`), **migrations appliquees au demarrage** |
+| `el-haress-collector`   | polling des passerelles STE2 |
 
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+- API : http://localhost:8000 — OpenAPI : http://localhost:8000/docs — sante :
+  http://localhost:8000/api/v1/health
+- Le code (`backend/src`) est monte en volume : les modifications rechargent
+  l'API a chaud, sans reconstruire l'image.
+- Les cles JWT RS256 sont lues depuis `backend/keys/` (montees) ; si le dossier
+  est vide, des cles de developpement sont generees automatiquement.
+- Logs : `docker compose logs -f backend collector`.
 
-# Cles JWT RS256 (hors depot, dans keys/ qui est gitignore)
-mkdir -p keys
-openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048
-openssl rsa -in keys/private.pem -pubout -out keys/public.pem
+> **Collector et STE2.** Le collector doit joindre la passerelle STE2 sur le LAN.
+> Le NAT sortant du reseau Docker le permet dans la plupart des cas ; si l'appareil
+> reste injoignable depuis le conteneur, passer le service `collector` en
+> `network_mode: host` (voir commentaire dans `docker-compose.yml`).
 
-# Migrations (cree le schema, l'hypertable, la retention 30 jours)
-alembic upgrade head
-
-# Lancer l'API
-uvicorn src.main:app --reload --port 8000
-```
-
-- API : http://localhost:8000
-- Documentation OpenAPI : http://localhost:8000/docs
-- Sante du service : http://localhost:8000/api/v1/health
-
-### 4. Collector (polling des capteurs)
-
-Dans un autre terminal, avec le venv active (`source backend/.venv/bin/activate`) :
-
-```bash
-cd backend
-python -m src.collector
-```
-
-> Le collector lit l'URL de la passerelle dans `STE2_BASE_URL`. Si la passerelle
-> est injoignable, il reste resilient et reessaie ; aucune valeur de capteur ou
-> de seuil n'est codee en dur.
-
-### 5. Frontend — tableau de bord
+### 3. Frontend — tableau de bord (local)
 
 ```bash
 cd frontend
@@ -189,17 +170,26 @@ npm install
 npm run dev
 ```
 
-Interface : http://localhost:5173
+Interface : http://localhost:5173 — Vite proxifie `/api` et le WebSocket vers le
+backend Docker sur `:8000`.
+
+> **Alternative — backend en local (sans Docker).** Utile pour deboguer le
+> collector face au STE2. Lancer seulement les dependances
+> (`docker compose up -d timescaledb redis`), puis dans `backend/` : creer un
+> venv, `pip install -e ".[dev]"`, generer les cles (`openssl genpkey ...`),
+> `alembic upgrade head`, puis `uvicorn src.main:app --reload` et, dans un autre
+> terminal, `python -m src.collector`.
 
 ---
 
 ## Premiere connexion
 
 Aucune auto-inscription : le premier compte est un **SUPER_ADMIN** cree en ligne
-de commande. Depuis `backend/` (venv active, base accessible) :
+de commande, dans le conteneur backend :
 
 ```bash
-python scripts/create_superadmin.py --phone +2224XXXXXX --company "Operateur"
+docker compose exec backend python scripts/create_superadmin.py \
+  --phone +2224XXXXXX --company "Operateur"
 ```
 
 Le mot de passe est demande de maniere interactive (jamais en argument, jamais
