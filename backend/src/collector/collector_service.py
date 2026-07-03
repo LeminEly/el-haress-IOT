@@ -21,7 +21,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from ..sensors.sensors_models import Gateway, Reading, Sensor
 from ..sensors.ste2_client import SampleSource
-from ..sensors.ste2_parser import is_binary_kind
 
 logger = structlog.get_logger(__name__)
 
@@ -117,29 +116,17 @@ class CollectorService:
                         if sample.kind != "unknown" and sensor.kind != sample.kind:
                             sensor.kind = sample.kind
 
-                    # Capteur binaire (flood/contact...) : son etat declenche sort
-                    # la valeur de la plage (sentinelle), on s'appuie sur status_state
-                    # (1=normal, 2=alarme). Un detecteur de securite ne doit jamais
-                    # etre masque : tant que l'appareil le voit, on enregistre 0/1.
-                    if is_binary_kind(sensor.kind):
-                        present = sample.status_state in ("1", "2")
-                        detected = (
-                            sample.status_state == "2"
-                            or sample.alarm == "1"
-                            or (sample.value or 0.0) > 0.0
-                        )
-                        reading_value: float | None = 1.0 if detected else 0.0
-                    else:
-                        present = sample.valid
-                        reading_value = sample.value
-
-                    if present and sensor.is_active and reading_value is not None:
+                    # Le parser fournit deja la bonne valeur : etat 0/1 pour un
+                    # capteur binaire (flood/contact), mesure continue sinon. Une
+                    # lecture en alarme (flood mouille : State=5, Value=1) reste
+                    # valide, donc le capteur ne disparait jamais au declenchement.
+                    if sample.valid and sensor.is_active and sample.value is not None:
                         session.add(
                             Reading(
                                 account_id=gateway.account_id,
                                 sensor_id=sensor.id,
                                 recorded_at=now,
-                                value=reading_value,
+                                value=sample.value,
                             )
                         )
                         sensor.last_seen_at = now
@@ -147,12 +134,12 @@ class CollectorService:
                         published.append(
                             {
                                 "sensor_id": str(sensor.id),
-                                "value": reading_value,
+                                "value": sample.value,
                                 "recorded_at": now.isoformat(),
                             }
                         )
-                        events.append((sensor.id, reading_value))
-                    elif not present:
+                        events.append((sensor.id, sample.value))
+                    elif not sample.valid:
                         mute += 1
 
                 refreshed = await session.get(Gateway, gateway.id)

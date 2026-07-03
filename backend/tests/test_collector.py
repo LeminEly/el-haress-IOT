@@ -189,10 +189,10 @@ async def test_cycle_provisions_sensors_and_inserts_readings(
 async def test_binary_sensor_triggered_state_stays_visible(
     session_factory: async_sessionmaker,
 ) -> None:
-    # Un detecteur binaire (flood) ne doit jamais disparaitre. A l'etat normal il
-    # lit une valeur (0) ; a l'etat declenche l'appareil sort la valeur de la plage
-    # (sentinelle -999.9, status_state=2). On enregistre alors l'etat 1 (Detecte),
-    # au lieu de le traiter comme muet et de le masquer.
+    # Un detecteur binaire (flood) ne doit jamais disparaitre au declenchement.
+    # Etat normal (sec) : Units=WLD, Value=0, State=1 -> le parser donne value=0.0.
+    # Etat declenche (mouille) : Units=WLD, Value=1, State=5 (alarme) -> le parser
+    # donne une lecture VALIDE value=1.0 (State != 0). Le capteur reste enregistre.
     await _seed_gateway(session_factory)
     normal = _FakeClient(
         [
@@ -203,7 +203,6 @@ async def test_binary_sensor_triggered_state_stays_visible(
                 kind="flood",
                 value=0.0,
                 valid=True,
-                status_state="1",
             )
         ]
     )
@@ -214,17 +213,16 @@ async def test_binary_sensor_triggered_state_stays_visible(
             Ste2Sample(
                 gateway_ref="12571",
                 name="Flood",
-                unit=None,
-                kind="unknown",
-                value=None,
-                valid=False,
-                status_state="2",
+                unit="WLD",
+                kind="flood",
+                value=1.0,
+                valid=True,
             )
         ]
     )
     result = (await CollectorService(session_factory, triggered).run_cycle())[0]
 
-    assert result.readings_inserted == 1  # enregistre malgre la sentinelle
+    assert result.readings_inserted == 1  # enregistre malgre l'etat d'alarme
     assert result.mute == 0
 
     async with session_factory() as session:

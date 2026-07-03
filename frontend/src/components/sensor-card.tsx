@@ -10,25 +10,14 @@ interface SensorCardProps {
   label: string;
   value?: number;
   unit?: string | null;
-  isBinary?: boolean;
   recordedAt?: string;
   status: SensorStatus;
   onClick?: () => void;
 }
 
-export function SensorCard({
-  label,
-  value,
-  unit,
-  isBinary = false,
-  recordedAt,
-  status,
-  onClick,
-}: SensorCardProps) {
+export function SensorCard({ label, value, unit, recordedAt, status, onClick }: SensorCardProps) {
   const { t } = useTranslation();
   const locale = useSettings((state) => state.locale);
-
-  const binaryLabel = value != null ? t(value > 0.5 ? 'sensor.detected' : 'sensor.normal') : '--';
 
   return (
     <button
@@ -47,16 +36,10 @@ export function SensorCard({
         </div>
       </div>
       <div className="mt-3 flex items-baseline gap-1">
-        {isBinary ? (
-          <span className="text-2xl font-semibold">{binaryLabel}</span>
-        ) : (
-          <>
-            <span className="text-3xl font-semibold tabular-nums">
-              {value != null ? formatValue(value, locale) : '--'}
-            </span>
-            {unit && <span className="text-sm text-fg-muted">{unit}</span>}
-          </>
-        )}
+        <span className="text-3xl font-semibold tabular-nums">
+          {value != null ? formatValue(value, locale) : '--'}
+        </span>
+        {unit && <span className="text-sm text-fg-muted">{unit}</span>}
       </div>
       <div className="mt-2 text-xs text-fg-subtle">
         {recordedAt ? formatRelative(recordedAt, locale) : t('status.offline')}

@@ -12,7 +12,7 @@ import { StatusDot } from '@/components/ui/status-dot';
 import { useDashboardSummary, useReadings, useSensors } from '@/hooks/queries';
 import { useLiveReadings } from '@/hooks/use-live';
 import { formatValue } from '@/lib/format';
-import { formatSensorValue, isDetected, sensorName } from '@/lib/sensor-display';
+import { formatSensorValue, sensorName } from '@/lib/sensor-display';
 import { useSettings } from '@/stores/settings';
 import type { ReadingPoint, Sensor, SensorStatus } from '@/types/api';
 
@@ -35,13 +35,7 @@ function isOnline(entry: LiveEntry | undefined, sensor: Sensor, windowMs: number
 }
 
 function sensorStatus(entry: LiveEntry | undefined, sensor: Sensor): SensorStatus {
-  if (!entry) {
-    return 'normal';
-  }
-  if (sensor.is_binary) {
-    return isDetected(entry.value) ? 'critical' : 'normal';
-  }
-  if (sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
+  if (entry && sensor.critical_threshold != null && entry.value > sensor.critical_threshold) {
     return 'critical';
   }
   return 'normal';
@@ -114,10 +108,9 @@ export default function DashboardPage() {
   const onlineSensors = sensorList.filter((sensor) =>
     isOnline(live[sensor.id], sensor, offlineAfterMs),
   );
-  // Le graphe lineaire ne represente que les capteurs continus : un capteur
-  // binaire (0/1) ecraserait l'axe Y et serait illisible. Il reste visible via
-  // sa carte (Detecte / Normal).
-  const chartSensors = onlineSensors.filter((sensor) => !sensor.is_binary);
+  // Legende du graphe : tous les capteurs connectes ; on decoche via la legende
+  // ceux qu'on ne veut pas tracer (utile si les echelles different beaucoup).
+  const chartSensors = onlineSensors;
   const visibleSensors = chartSensors.filter((sensor) => !hidden.has(sensor.id));
   const detailSensor = sensorList.find((sensor) => sensor.id === detailId);
   const detailPoints = detailSensor
@@ -171,7 +164,6 @@ export default function DashboardPage() {
                   label={sensorName(sensor)}
                   value={entry?.value}
                   unit={sensor.unit}
-                  isBinary={sensor.is_binary}
                   recordedAt={entry?.recorded_at}
                   status={sensorStatus(entry, sensor)}
                   onClick={() => setDetailId(sensor.id)}
@@ -206,7 +198,7 @@ export default function DashboardPage() {
                         <span className="text-fg">{sensorName(sensor)}</span>
                         {entry && (
                           <span className="tabular-nums text-fg-muted">
-                            {formatSensorValue(sensor, entry.value, locale, t)}
+                            {formatSensorValue(sensor, entry.value, locale)}
                           </span>
                         )}
                       </label>
@@ -237,7 +229,7 @@ export default function DashboardPage() {
               <span>
                 {t('dashboard.current')} :{' '}
                 <span className="font-medium text-fg">
-                  {formatSensorValue(detailSensor, live[detailSensor.id]?.value, locale, t)}
+                  {formatSensorValue(detailSensor, live[detailSensor.id]?.value, locale)}
                 </span>
               </span>
               <span>

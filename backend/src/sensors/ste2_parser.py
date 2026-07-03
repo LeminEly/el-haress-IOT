@@ -13,16 +13,14 @@ from dataclasses import dataclass, replace
 from defusedxml.ElementTree import fromstring
 
 _INVALID_VALUE = -999.9
-# Unite STE2 -> type de capteur. Table extensible : ajouter un code suffit pour
-# prendre en charge un nouveau type, sans toucher au reste du collector.
+# Unite STE2 -> categorie de capteur (pour l'affichage/groupement uniquement,
+# jamais pour interpreter la valeur). Table extensible : ajouter un code suffit.
 _UNIT_TO_KIND = {
     "C": "temperature",
     "F": "temperature",
     "%": "humidity",
     "WLD": "flood",
 }
-# Types a etat binaire (detecte / normal) plutot qu'a valeur continue.
-_BINARY_KINDS = frozenset({"flood", "contact", "motion", "smoke"})
 
 
 @dataclass(frozen=True)
@@ -31,13 +29,11 @@ class Ste2Sample:
     name: str
     unit: str | None
     kind: str
+    # Valeur telle que renvoyee par le STE2, sans reinterpretation : un capteur
+    # continu donne sa mesure, un capteur a etats discrets donne son etat brut
+    # (0/1 pour un flood, 0/1/2/3 pour d'autres). On ne force jamais en binaire.
     value: float | None
     valid: bool
-    # Codes d'etat appareil (status/state, status/alarm). Pour un capteur binaire,
-    # l'etat declenche sort la valeur de la plage (sentinelle -999.9) : on s'appuie
-    # alors sur status_state (1=normal, 2=alarme) plutot que sur la valeur continue.
-    status_state: str = "1"
-    alarm: str = "0"
     hardware_id: str | None = None
 
 
@@ -45,11 +41,6 @@ def infer_kind(unit: str | None) -> str:
     if unit is None:
         return "unknown"
     return _UNIT_TO_KIND.get(unit.strip(), "unknown")
-
-
-def is_binary_kind(kind: str) -> bool:
-    """Un capteur binaire n'a pas de mesure continue : on en derive un etat 0/1."""
-    return kind in _BINARY_KINDS
 
 
 def _localname(tag: str) -> str:
@@ -71,51 +62,36 @@ def parse_values(xml_text: str) -> list[Ste2Sample]:
             continue
         unit = fields.get("Units") or None
         state = fields.get("State", "0")
-        alarm = _nested_text(entry, "status", "alarm")
-        status_state = _nested_text(entry, "status", "state") or state
         kind = infer_kind(unit)
         try:
             raw_value: float | None = float(fields.get("Value", ""))
         except ValueError:
             raw_value = None
+        # State : 0 = pas de capteur / invalide ; 1 = normal ; >1 (ex. 5) = lecture
+        # valide EN ALARME (hors plage). On accepte donc tout State != 0 : sinon un
+        # capteur en alarme (flood mouille, temperature hors seuil) disparaitrait au
+        # pire moment. Seul State == 0 (ou la sentinelle -999.9, ou l'unite absente)
+        # signale reellement l'absence de mesure.
         valid = (
             raw_value is not None
             and abs(raw_value - _INVALID_VALUE) > 1e-6
-            and state == "1"
+            and state != "0"
             and unit is not None
         )
-        if not valid:
-            value: float | None = None
-        elif is_binary_kind(kind):
-            # Capteur binaire : on derive un etat 0/1. "Detecte" si l'appareil
-            # signale une alarme ou si la valeur brute est non nulle.
-            detected = alarm == "1" or (raw_value is not None and raw_value != 0.0)
-            value = 1.0 if detected else 0.0
-        else:
-            value = raw_value
+        # On stocke la valeur BRUTE du STE2, sans reinterpretation : le STE2 renvoie
+        # deja l'etat pertinent (0/1 pour un flood, 0/1/2/3 pour d'autres, une mesure
+        # continue sinon). Aucune valeur en dur, aucun forcage en binaire.
         samples.append(
             Ste2Sample(
                 gateway_ref=gateway_ref,
                 name=fields.get("Name", ""),
                 unit=unit,
                 kind=kind,
-                value=value,
+                value=raw_value if valid else None,
                 valid=valid,
-                status_state=status_state,
-                alarm=alarm,
             )
         )
     return samples
-
-
-def _nested_text(entry, parent: str, child: str) -> str:
-    """Texte d'un sous-element (`<parent><child>...`), chaine vide si absent."""
-    for element in entry:
-        if _localname(element.tag) == parent:
-            for sub in element:
-                if _localname(sub.tag) == child:
-                    return (sub.text or "").strip()
-    return ""
 
 
 def parse_identities(xml_text: str) -> dict[str, str]:

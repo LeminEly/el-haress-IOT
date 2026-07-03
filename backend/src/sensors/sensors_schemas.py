@@ -51,8 +51,6 @@ class SensorRead(BaseModel):
     device_index: int | None = None
     # Nom d'affichage genere : el-haress-NN-<label> (prefixe + index entreprise).
     display_name: str = ""
-    # Capteur a etat binaire (Detecte / Normal) plutot qu'a valeur continue.
-    is_binary: bool = False
     # Connectivite reelle : mesure recente (< fenetre de fraicheur) et capteur actif.
     # Distinct de `is_active` (drapeau de configuration).
     online: bool = False

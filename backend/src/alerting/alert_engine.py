@@ -27,7 +27,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from ..auth.auth_models import Account
 from ..notifications.messages import build_alert_message
 from ..sensors.sensors_models import Sensor
-from ..sensors.ste2_parser import is_binary_kind
 from .alerting_models import Alert, AlertCondition, AlertRule, AlertStatus
 
 logger = structlog.get_logger(__name__)
@@ -49,8 +48,7 @@ def _sensor_name(sensor: Sensor | None) -> str:
 
 
 def _value_text(sensor: Sensor | None, value: float) -> str:
-    if sensor is not None and is_binary_kind(sensor.kind):
-        return "1" if value > 0.5 else "0"
+    # Valeur brute + unite telles que remontees par le capteur (aucune reinterpretation).
     unit = f" {sensor.unit}" if sensor is not None and sensor.unit else ""
     return f"{value}{unit}"
 

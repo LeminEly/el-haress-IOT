@@ -92,9 +92,7 @@ export default function HistoryPage() {
 
   const visibleIds = selected.length > 0 ? selected : selectedCategorySensors.map((s) => s.id);
   const visibleSensors = sensorList.filter((s) => visibleIds.includes(s.id));
-  // Le graphe lineaire n'affiche que les capteurs continus ; les binaires (0/1)
-  // restent visibles dans le tableau (Detecte / Normal).
-  const chartSensors = visibleSensors.filter((s) => !s.is_binary);
+  const chartSensors = visibleSensors;
 
   const readings = useReadings({ start, end, limit: 5000 }, { refetchInterval: 10_000 });
 
@@ -352,7 +350,7 @@ export default function HistoryPage() {
                             </TD>
                             <TD className="text-end text-xs tabular-nums">
                               {sensor
-                                ? formatSensorValue(sensor, point.value, locale, t)
+                                ? formatSensorValue(sensor, point.value, locale)
                                 : formatValue(point.value, locale)}
                             </TD>
                           </TR>

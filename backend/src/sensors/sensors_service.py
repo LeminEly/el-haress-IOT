@@ -26,7 +26,6 @@ from .sensors_schemas import (
     SensorRead,
     SensorUpdate,
 )
-from .ste2_parser import is_binary_kind
 
 _BUCKET_VIEW = {ReadingBucket.MIN: "readings_1min", ReadingBucket.HOUR: "readings_1hour"}
 _MAX_LIMIT = 5000
@@ -89,7 +88,6 @@ class SensorsService:
             update={
                 "online": self._is_online(sensor, cutoff),
                 "display_name": self._display_name(sensor),
-                "is_binary": is_binary_kind(sensor.kind),
             }
         )
 
