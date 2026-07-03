@@ -1,14 +1,16 @@
+import { ArrowLeft } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { LanguageSwitch } from '@/components/language-switch';
 import { LogoMark } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import { useLogin } from '@/hooks/use-auth';
 
 export default function LoginPage() {
@@ -20,11 +22,21 @@ export default function LoginPage() {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    login.mutate({ phone_number: phone, password }, { onSuccess: () => navigate('/') });
+    login.mutate({ phone_number: phone, password }, { onSuccess: () => navigate('/app') });
   };
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center p-4">
+      <div className="absolute start-4 top-4 z-10 flex gap-2">
+        <Link
+          to="/"
+          className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'gap-1')}
+          aria-label={t('auth.backToHome')}
+        >
+          <ArrowLeft className="size-4" />
+          <span className="hidden sm:inline">{t('auth.backToHome')}</span>
+        </Link>
+      </div>
       <div className="absolute end-4 top-4 z-10 flex gap-2">
         <LanguageSwitch />
         <ThemeToggle />

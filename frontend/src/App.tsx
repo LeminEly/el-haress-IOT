@@ -7,6 +7,7 @@ import { AdminRoute, ProtectedRoute } from '@/components/protected-route';
 import { LoadingState } from '@/components/states';
 import { useMe } from '@/hooks/use-auth';
 
+const LandingPage = lazy(() => import('@/pages/landing'));
 const LoginPage = lazy(() => import('@/pages/login'));
 const DashboardPage = lazy(() => import('@/pages/dashboard'));
 const HistoryPage = lazy(() => import('@/pages/history'));
@@ -30,6 +31,7 @@ function HomeRedirect() {
 }
 
 const router = createBrowserRouter([
+  { path: '/', element: lazyPage(<LandingPage />) },
   { path: '/login', element: lazyPage(<LoginPage />) },
   {
     element: <ProtectedRoute />,
@@ -37,7 +39,10 @@ const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
-          { index: true, element: <HomeRedirect /> },
+          // '/' est la landing publique ; l'entree de l'app protegee est '/app',
+          // qui redirige vers l'accueil du role. Aucune route protegee ne
+          // reclame '/' (sinon un visiteur anonyme serait renvoye au login).
+          { path: 'app', element: <HomeRedirect /> },
           { path: 'dashboard', element: lazyPage(<DashboardPage />) },
           { path: 'history', element: lazyPage(<HistoryPage />) },
           { path: 'alerts', element: lazyPage(<AlertsPage />) },
