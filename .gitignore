@@ -150,3 +150,8 @@ tmp/
 .cache/
 *.bak
 *.tmp
+
+# Archives / dumps de sauvegarde (jamais versionnes)
+*.tar
+*.dump
+*.sql.gz
