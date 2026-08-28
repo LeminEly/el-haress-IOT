@@ -1,0 +1,169 @@
+{
+  "app": {
+    "name": "El-Haress",
+    "tagline": "Supervision environnementale des salles serveurs"
+  },
+  "theme": { "toggle": "Changer de theme" },
+  "language": {
+    "label": "Langue",
+    "alerts": "Langue des alertes",
+    "fr": "Francais",
+    "ar": "العربية",
+    "en": "English"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "history": "Historique",
+    "alerts": "Alertes",
+    "settings": "Parametres",
+    "accounts": "Comptes",
+    "logout": "Deconnexion"
+  },
+  "auth": {
+    "subtitle": "Connexion a votre espace de supervision",
+    "phone": "Numero de telephone",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion...",
+    "error": "Identifiants invalides"
+  },
+  "dashboard": {
+    "live": "En direct",
+    "offline": "Hors ligne",
+    "sensorsTotal": "Capteurs",
+    "sensorsActive": "Actifs",
+    "noSensors": "Aucun capteur declare pour le moment.",
+    "noConnected": "Aucun capteur connecte actuellement. Les capteurs hors ligne restent consultables dans l'historique.",
+    "evolution": "Evolution des capteurs",
+    "noData": "Aucune donnee sur la periode.",
+    "current": "Valeur actuelle",
+    "threshold": "Seuil",
+    "noThreshold": "Aucun seuil"
+  },
+  "sensor": {
+    "detected": "Detecte",
+    "normal": "Normal"
+  },
+  "history": {
+    "range": {
+      "1h": "1 h",
+      "6h": "6 h",
+      "24h": "24 h",
+      "7d": "7 j",
+      "30d": "30 j",
+      "custom": "Personnalise"
+    },
+    "from": "Du",
+    "to": "Au",
+    "apply": "Appliquer",
+    "category": "Categorie",
+    "allCategories": "Toutes les categories",
+    "prevPage": "Precedente",
+    "nextPage": "Suivante",
+    "page": "Page {page} / {total}",
+    "rowsPerPage": "Lignes / page",
+    "noMatchingCategory": "Aucun capteur dans cette categorie.",
+    "chartLabel": "{label} ({unit}) — seuil: {threshold} {unit}"
+  },
+  "alerts": {
+    "empty": "Aucune alerte.",
+    "severity": "Severite",
+    "value": "Valeur",
+    "time": "Horodatage",
+    "status": "Statut",
+    "ack": "Acquitter"
+  },
+  "status": {
+    "normal": "Normal",
+    "warning": "A surveiller",
+    "critical": "Critique",
+    "offline": "Hors ligne"
+  },
+  "severity": {
+    "INFO": "Info",
+    "WARNING": "Avertissement",
+    "CRITICAL": "Critique",
+    "EMERGENCY": "Urgence"
+  },
+  "alertStatus": {
+    "ACTIVE": "Active",
+    "ACKNOWLEDGED": "Acquittee",
+    "RESOLVED": "Resolue"
+  },
+  "accountStatus": { "ACTIVE": "Actif", "SUSPENDED": "Suspendu" },
+  "condition": { "GT": ">", "GTE": ">=", "LT": "<", "LTE": "<=" },
+  "channel": { "whatsapp": "WhatsApp", "sms": "SMS", "email": "Email" },
+  "settings": {
+    "gateways": "Passerelles",
+    "sensors": "Capteurs",
+    "rules": "Regles d'alerte",
+    "name": "Nom",
+    "baseUrl": "Adresse (URL)",
+    "add": "Ajouter",
+    "label": "Libelle",
+    "kind": "Type",
+    "state": "Etat",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "save": "Enregistrer",
+    "disable": "Desactiver",
+    "enable": "Activer",
+    "sensor": "Capteur",
+    "allSensors": "Tous les capteurs",
+    "condition": "Condition",
+    "threshold": "Seuil",
+    "severity": "Severite",
+    "cooldown": "Cooldown (min)",
+    "channels": "Canaux",
+    "criticalThreshold": "Seuil critique",
+    "curveColor": "Couleur courbe",
+    "clear": "Effacer",
+    "addRule": "Ajouter la regle",
+    "delete": "Supprimer"
+  },
+  "accounts": {
+    "create": "Creer un compte entreprise",
+    "company": "Entreprise",
+    "contactEmail": "Email de contact",
+    "role": "Role",
+    "status": "Statut",
+    "lastLogin": "Derniere connexion",
+    "createdAt": "Date de creation",
+    "phone": "Telephone",
+    "suspend": "Suspendre",
+    "activate": "Activer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirmSuspend": "Suspendre ce compte ?",
+    "confirmSuspendDesc": "L'entreprise ne pourra plus se connecter. Vous pourrez la reactiver a tout moment.",
+    "confirmActivate": "Reactiver ce compte ?",
+    "confirmActivateDesc": "L'entreprise pourra de nouveau acceder a la plateforme.",
+    "error": "Creation impossible (numero invalide ou deja utilise).",
+    "search": "Rechercher par entreprise ou telephone..."
+  },
+  "accountsEdit": {
+    "title": "Modifier le compte",
+    "companyName": "Nom de l'entreprise",
+    "contactEmail": "Email de contact",
+    "phoneNumber": "Numero de telephone",
+    "success": "Compte mis a jour."
+  },
+  "category": {
+    "temperature": "Temperature",
+    "humidity": "Humidite",
+    "gas": "Gaz",
+    "smoke": "Fumee",
+    "motion": "Mouvement",
+    "pressure": "Pression",
+    "light": "Luminosite",
+    "sound": "Son",
+    "other": "Autre"
+  },
+  "state": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue.",
+    "retry": "Reessayer",
+    "empty": "Aucune donnee."
+  }
+}

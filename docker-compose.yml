@@ -1,0 +1,45 @@
+# Stack de developpement local El-Haress.
+# Isolee (projet "el-haress", conteneurs et volumes dedies). Les ports hote sont
+# surchargeable pour cohabiter avec d'autres stacks sur la machine.
+#
+#   docker compose up -d timescaledb     base seule (suffit pour la phase 1)
+#   docker compose up -d                 base + redis
+name: el-haress
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.17.2-pg16
+    container_name: el-haress-timescaledb
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-el_haress}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-el_haress}
+    ports:
+      - '${POSTGRES_HOST_PORT:-5432}:5432'
+    volumes:
+      - el_haress_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-el_haress} -d ${POSTGRES_DB:-el_haress}']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: el-haress-redis
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '${REDIS_HOST_PORT:-6380}:6379'
+    volumes:
+      - el_haress_redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+volumes:
+  el_haress_pgdata:
+  el_haress_redisdata:

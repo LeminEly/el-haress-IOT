@@ -1,0 +1,24 @@
+[Unit]
+Description=El-Haress sensor collector (STE2 LITE polling)
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=el-haress
+Group=el-haress
+WorkingDirectory=/opt/el-haress/app/backend
+EnvironmentFile=/etc/el-haress/el-haress.env
+ExecStart=/opt/el-haress/app/backend/.venv/bin/python -m src.collector
+Restart=always
+RestartSec=5
+
+# Durcissement
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/el-haress
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,109 @@
+@import 'tailwindcss';
+
+/* Mode sombre pilote par la classe .dark sur <html> (posee avant le 1er paint). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ----------------------------------------------------------------------------
+   Polices auto-hebergees (CSP font-src 'self', aucune dependance reseau).
+   Inter (variable) pour l'interface latine, Cairo pour l'arabe (RTL).
+   ---------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter/Inter-Variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/cairo/Cairo-Regular.woff2') format('woff2');
+}
+
+/* ----------------------------------------------------------------------------
+   Tokens — palette monochrome (blanc pur clair / noir sombre, echelle zinc).
+   Surfaces solides, bordures fines, primaire = noir/blanc (aucun accent de
+   couleur). La couleur est reservee aux etats de supervision.
+   ---------------------------------------------------------------------------- */
+:root {
+  --bg: #ffffff;
+  --elevated: #ffffff;
+  --surface: #f4f4f5;
+  --surface-strong: #e4e4e7;
+  --border: #e4e4e7;
+  --fg: #09090b;
+  --fg-muted: #52525b;
+  --fg-subtle: #a1a1aa;
+  --primary: #18181b;
+  --primary-fg: #fafafa;
+  --ring: #18181b;
+  --normal: #16a34a;
+  --warning: #d97706;
+  --critical: #dc2626;
+  --offline: #a1a1aa;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --elevated: #141414;
+  --surface: #1c1c1f;
+  --surface-strong: #27272a;
+  --border: #272729;
+  --fg: #fafafa;
+  --fg-muted: #a1a1aa;
+  --fg-subtle: #71717a;
+  --primary: #fafafa;
+  --primary-fg: #18181b;
+  --ring: #d4d4d8;
+  --normal: #4ade80;
+  --warning: #fbbf24;
+  --critical: #f87171;
+  --offline: #71717a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-elevated: var(--elevated);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-ring: var(--ring);
+  --color-normal: var(--normal);
+  --color-warning: var(--warning);
+  --color-critical: var(--critical);
+  --color-offline: var(--offline);
+  --radius-lg: 0.625rem;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* En contexte arabe, toute l'interface bascule sur Cairo. */
+  :where([dir='rtl']) body {
+    font-family: 'Cairo', var(--font-sans);
+  }
+}

@@ -1,0 +1,26 @@
+title = "El-Haress — configuration gitleaks"
+
+# Detection de secrets avant tout commit (pre-commit) et en CI.
+# Base de regles par defaut + exclusions validees pour ce projet.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exclusions validees pour ce depot"
+paths = [
+  # Le fichier de configuration gitleaks lui-meme.
+  '''\.gitleaks\.toml''',
+  # Exemple d'environnement : valeurs factices, jamais de vrai secret.
+  '''\.env\.example''',
+  # Collections Postman : tokens d'exemple non secrets.
+  '''postman/.*''',
+  # Fixtures de test : hashes bcrypt et secrets factices.
+  '''.*_test\.py''',
+  '''.*\.spec\.(ts|tsx)''',
+]
+
+# Tolerer les cles publiques (non sensibles) si jamais versionnees explicitement.
+regexes = [
+  '''-----BEGIN PUBLIC KEY-----''',
+]

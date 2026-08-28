@@ -1,0 +1,21 @@
+# Normalisation des fins de ligne — coherence cross-OS au depot
+* text=auto eol=lf
+
+# Scripts shell toujours en LF
+*.sh text eol=lf
+
+# Fichiers binaires : pas de conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.xlsx binary
+
+# Lockfiles : traites comme generes dans les diffs
+package-lock.json linguist-generated=true
+poetry.lock linguist-generated=true
+uv.lock linguist-generated=true

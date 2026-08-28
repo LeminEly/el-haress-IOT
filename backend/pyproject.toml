@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "el-haress-backend"
+version = "0.1.0"
+description = "El-Haress — backend de supervision environnementale multi-entreprises"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "gunicorn>=23.0",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30",
+  "alembic>=1.14",
+  "redis>=5.2",
+  "structlog>=24.4",
+  "httpx>=0.27",
+  "pyjwt[crypto]>=2.10",
+  "bcrypt>=4.2",
+  "phonenumbers>=8.13",
+  "defusedxml>=0.7",
+  "aiosmtplib>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.8",
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=6.0",
+  "fakeredis>=2.26",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+# ---------------------------------------------------------------------------
+# Lint et format — ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "C4", "SIM", "ASYNC", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+# Le pattern `param = Depends(...)` de FastAPI est volontaire (B008).
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+  "fastapi.Depends",
+  "fastapi.Query",
+  "fastapi.Path",
+  "fastapi.Header",
+  "fastapi.Cookie",
+  "fastapi.Body",
+  "fastapi.Security",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+# ---------------------------------------------------------------------------
+# Couverture — tracer le code async (greenlet) et le thread du client de test
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src"]
+concurrency = ["thread", "greenlet"]
+
+# ---------------------------------------------------------------------------
+# Tests — pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"

@@ -1,0 +1,162 @@
+{
+  "app": {
+    "name": "El-Haress",
+    "tagline": "Server room environmental monitoring"
+  },
+  "theme": { "toggle": "Toggle theme" },
+  "language": {
+    "label": "Language",
+    "alerts": "Alert language",
+    "fr": "Francais",
+    "ar": "العربية",
+    "en": "English"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "history": "History",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "accounts": "Accounts",
+    "logout": "Log out"
+  },
+  "auth": {
+    "subtitle": "Sign in to your monitoring workspace",
+    "phone": "Phone number",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "error": "Invalid credentials"
+  },
+  "dashboard": {
+    "live": "Live",
+    "offline": "Offline",
+    "sensorsTotal": "Sensors",
+    "sensorsActive": "Active",
+    "noSensors": "No sensor declared yet.",
+    "noConnected": "No sensor connected right now. Offline sensors remain available in history.",
+    "evolution": "Sensor evolution",
+    "noData": "No data for this range.",
+    "current": "Current value",
+    "threshold": "Threshold",
+    "noThreshold": "No threshold"
+  },
+  "sensor": {
+    "detected": "Detected",
+    "normal": "Normal"
+  },
+  "history": {
+    "range": { "1h": "1h", "6h": "6h", "24h": "24h", "7d": "7d", "30d": "30d", "custom": "Custom" },
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "category": "Category",
+    "allCategories": "All categories",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "page": "Page {page} / {total}",
+    "rowsPerPage": "Rows / page",
+    "noMatchingCategory": "No sensors in this category.",
+    "chartLabel": "{label} ({unit}) — threshold: {threshold} {unit}"
+  },
+  "alerts": {
+    "empty": "No alerts.",
+    "severity": "Severity",
+    "value": "Value",
+    "time": "Timestamp",
+    "status": "Status",
+    "ack": "Acknowledge"
+  },
+  "status": {
+    "normal": "Normal",
+    "warning": "Warning",
+    "critical": "Critical",
+    "offline": "Offline"
+  },
+  "severity": {
+    "INFO": "Info",
+    "WARNING": "Warning",
+    "CRITICAL": "Critical",
+    "EMERGENCY": "Emergency"
+  },
+  "alertStatus": {
+    "ACTIVE": "Active",
+    "ACKNOWLEDGED": "Acknowledged",
+    "RESOLVED": "Resolved"
+  },
+  "accountStatus": { "ACTIVE": "Active", "SUSPENDED": "Suspended" },
+  "condition": { "GT": ">", "GTE": ">=", "LT": "<", "LTE": "<=" },
+  "channel": { "whatsapp": "WhatsApp", "sms": "SMS", "email": "Email" },
+  "settings": {
+    "gateways": "Gateways",
+    "sensors": "Sensors",
+    "rules": "Alert rules",
+    "name": "Name",
+    "baseUrl": "Address (URL)",
+    "add": "Add",
+    "label": "Label",
+    "kind": "Type",
+    "state": "State",
+    "active": "Active",
+    "inactive": "Inactive",
+    "save": "Save",
+    "disable": "Disable",
+    "enable": "Enable",
+    "sensor": "Sensor",
+    "allSensors": "All sensors",
+    "condition": "Condition",
+    "threshold": "Threshold",
+    "severity": "Severity",
+    "cooldown": "Cooldown (min)",
+    "channels": "Channels",
+    "criticalThreshold": "Critical threshold",
+    "curveColor": "Curve color",
+    "clear": "Clear",
+    "addRule": "Add rule",
+    "delete": "Delete"
+  },
+  "accounts": {
+    "create": "Create a company account",
+    "company": "Company",
+    "contactEmail": "Contact email",
+    "role": "Role",
+    "status": "Status",
+    "lastLogin": "Last login",
+    "createdAt": "Created at",
+    "phone": "Phone",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmSuspend": "Suspend this account?",
+    "confirmSuspendDesc": "The company will not be able to log in. You can reactivate it at any time.",
+    "confirmActivate": "Reactivate this account?",
+    "confirmActivateDesc": "The company will be able to access the platform again.",
+    "error": "Cannot create (invalid or already used number).",
+    "search": "Search by company or phone..."
+  },
+  "accountsEdit": {
+    "title": "Edit account",
+    "companyName": "Company name",
+    "contactEmail": "Contact email",
+    "phoneNumber": "Phone number",
+    "success": "Account updated."
+  },
+  "category": {
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "gas": "Gas",
+    "smoke": "Smoke",
+    "motion": "Motion",
+    "pressure": "Pressure",
+    "light": "Light",
+    "sound": "Sound",
+    "other": "Other"
+  },
+  "state": {
+    "loading": "Loading...",
+    "error": "Something went wrong.",
+    "retry": "Retry",
+    "empty": "No data."
+  }
+}

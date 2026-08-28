@@ -1,0 +1,70 @@
+# Hooks de pre-commit — premiere barriere avant que quoi que ce soit n'entre
+# dans l'historique git. Installer une fois :  pre-commit install
+#
+#   pip install pre-commit        (ou pipx install pre-commit)
+#   pre-commit install            (active le hook git local)
+#   pre-commit run --all-files    (controle l'ensemble du depot)
+#
+# Aucun secret, aucun fichier volumineux, aucun debug ne doit franchir cette
+# barriere. Les hooks tournent aussi en CI (voir .gitlab-ci.yml).
+
+minimum_pre_commit_version: "3.5.0"
+fail_fast: false
+
+default_language_version:
+  python: python3.12
+
+repos:
+  # ---------------------------------------------------------------------------
+  # Garde-fous generaux
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: detect-private-key
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-executables-have-shebangs
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, develop, --branch, development]
+
+  # ---------------------------------------------------------------------------
+  # Detection de secrets (cle API, token, mot de passe en dur)
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  # ---------------------------------------------------------------------------
+  # Backend Python — lint + format (ruff)
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format
+        files: ^backend/
+
+  # ---------------------------------------------------------------------------
+  # Frontend — format (prettier) via hook local, si le frontend existe
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: prettier-frontend
+        name: prettier (frontend)
+        entry: bash -c 'cd frontend && npx --no-install prettier --write "$@" || true' --
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx|css|json|html)$
+        pass_filenames: true

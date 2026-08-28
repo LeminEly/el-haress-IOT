@@ -1,0 +1,169 @@
+{
+  "app": {
+    "name": "الحارس",
+    "tagline": "مراقبة بيئة غرف الخوادم"
+  },
+  "theme": { "toggle": "تغيير السمة" },
+  "language": {
+    "label": "اللغة",
+    "alerts": "لغة التنبيهات",
+    "fr": "Francais",
+    "ar": "العربية",
+    "en": "English"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "history": "السجل",
+    "alerts": "التنبيهات",
+    "settings": "الإعدادات",
+    "accounts": "الحسابات",
+    "logout": "تسجيل الخروج"
+  },
+  "auth": {
+    "subtitle": "تسجيل الدخول إلى مساحة المراقبة",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "submit": "تسجيل الدخول",
+    "submitting": "جارٍ الدخول...",
+    "error": "بيانات اعتماد غير صالحة"
+  },
+  "dashboard": {
+    "live": "مباشر",
+    "offline": "غير متصل",
+    "sensorsTotal": "المستشعرات",
+    "sensorsActive": "نشطة",
+    "noSensors": "لا يوجد مستشعر معرف حتى الآن.",
+    "noConnected": "لا يوجد مستشعر متصل حاليا. تبقى المستشعرات غير المتصلة متاحة في السجل.",
+    "evolution": "تطور المستشعرات",
+    "noData": "لا توجد بيانات لهذه الفترة.",
+    "current": "القيمة الحالية",
+    "threshold": "العتبة",
+    "noThreshold": "لا توجد عتبة"
+  },
+  "sensor": {
+    "detected": "تم الكشف",
+    "normal": "عادي"
+  },
+  "history": {
+    "range": {
+      "1h": "ساعة",
+      "6h": "6 ساعات",
+      "24h": "24 ساعة",
+      "7d": "7 أيام",
+      "30d": "30 يومًا",
+      "custom": "مخصص"
+    },
+    "from": "من",
+    "to": "إلى",
+    "apply": "تطبيق",
+    "category": "الفئة",
+    "allCategories": "جميع الفئات",
+    "prevPage": "السابق",
+    "nextPage": "التالي",
+    "page": "الصفحة {page} / {total}",
+    "rowsPerPage": "سطر / صفحة",
+    "noMatchingCategory": "لا توجد مستشعرات في هذه الفئة.",
+    "chartLabel": "{label} ({unit}) — الحد: {threshold} {unit}"
+  },
+  "alerts": {
+    "empty": "لا توجد تنبيهات.",
+    "severity": "الخطورة",
+    "value": "القيمة",
+    "time": "الوقت",
+    "status": "الحالة",
+    "ack": "إقرار"
+  },
+  "status": {
+    "normal": "طبيعي",
+    "warning": "للمراقبة",
+    "critical": "حرج",
+    "offline": "غير متصل"
+  },
+  "severity": {
+    "INFO": "معلومة",
+    "WARNING": "تحذير",
+    "CRITICAL": "حرج",
+    "EMERGENCY": "طارئ"
+  },
+  "alertStatus": {
+    "ACTIVE": "نشط",
+    "ACKNOWLEDGED": "تم الإقرار",
+    "RESOLVED": "تم الحل"
+  },
+  "accountStatus": { "ACTIVE": "نشط", "SUSPENDED": "موقوف" },
+  "condition": { "GT": ">", "GTE": ">=", "LT": "<", "LTE": "<=" },
+  "channel": { "whatsapp": "واتساب", "sms": "رسالة", "email": "بريد" },
+  "settings": {
+    "gateways": "البوابات",
+    "sensors": "المستشعرات",
+    "rules": "قواعد التنبيه",
+    "name": "الاسم",
+    "baseUrl": "العنوان (URL)",
+    "add": "إضافة",
+    "label": "التسمية",
+    "kind": "النوع",
+    "state": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "save": "حفظ",
+    "disable": "تعطيل",
+    "enable": "تفعيل",
+    "sensor": "المستشعر",
+    "allSensors": "كل المستشعرات",
+    "condition": "الشرط",
+    "threshold": "العتبة",
+    "severity": "الخطورة",
+    "cooldown": "فترة التهدئة (دقيقة)",
+    "channels": "القنوات",
+    "criticalThreshold": "العتبة الحرجة",
+    "curveColor": "لون المنحنى",
+    "clear": "مسح",
+    "addRule": "إضافة قاعدة",
+    "delete": "حذف"
+  },
+  "accounts": {
+    "create": "إنشاء حساب شركة",
+    "company": "الشركة",
+    "contactEmail": "البريد الإلكتروني للتواصل",
+    "role": "الدور",
+    "status": "الحالة",
+    "lastLogin": "آخر تسجيل دخول",
+    "createdAt": "تاريخ الإنشاء",
+    "phone": "الهاتف",
+    "suspend": "إيقاف",
+    "activate": "تفعيل",
+    "edit": "تعديل",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirmSuspend": "إيقاف هذا الحساب؟",
+    "confirmSuspendDesc": "لن تتمكن الشركة من تسجيل الدخول. يمكنك إعادة تفعيلها في أي وقت.",
+    "confirmActivate": "إعادة تفعيل هذا الحساب؟",
+    "confirmActivateDesc": "ستتمكن الشركة من الوصول إلى المنصة مرة أخرى.",
+    "error": "تعذر الإنشاء (رقم غير صالح أو مستخدم).",
+    "search": "البحث بالشركة أو الهاتف..."
+  },
+  "accountsEdit": {
+    "title": "تعديل الحساب",
+    "companyName": "اسم الشركة",
+    "contactEmail": "البريد الإلكتروني للتواصل",
+    "phoneNumber": "رقم الهاتف",
+    "success": "تم تحديث الحساب."
+  },
+  "category": {
+    "temperature": "درجة الحرارة",
+    "humidity": "الرطوبة",
+    "gas": "غاز",
+    "smoke": "دخان",
+    "motion": "حركة",
+    "pressure": "الضغط",
+    "light": "الإضاءة",
+    "sound": "الصوت",
+    "other": "أخرى"
+  },
+  "state": {
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ ما.",
+    "retry": "إعادة المحاولة",
+    "empty": "لا توجد بيانات."
+  }
+}
